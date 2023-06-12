@@ -7,62 +7,104 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 
 bot = discord.AutoShardedBot()
-token = 'token'
+token = ''
 font_file_path = "C:/Users/lenli/AppData/Local/Microsoft/Windows/Fonts/zh-cn.ttf"
 DB_HOST = 'localhost'
 DB_PORT = '5433'
 DB_NAME = 'postgres'
 DB_USER = 'postgres'
-DB_PASS = 'pass'
+DB_PASS = ''
 
 
 async def init_bot():
     conn = await asyncpg.connect(user=DB_USER, password=DB_PASS, database=DB_NAME, host=DB_HOST)
     await conn.execute('CREATE TABLE IF NOT EXISTS voice(id char(20), uid char(4));')
+    await conn.close()
 
 
 class View(discord.ui.View):
     pass
+
+
 class Select(discord.ui.Select):
     pass
+
+
+class Button(discord.ui.Button):
+    pass
+
+
+class Modal(discord.ui.Modal):
+    pass
+
 
 @bot.slash_command(description="読み上げを開始・終了するのだ", guilds=["864441028866080768"])
 async def panel(ctx):
     await ctx.defer()
 
     selecter = Select()
+    generate_button = Button()
+    uid_change_button = Button()
+
     async def select_callback(interaction):
         await interaction.response.send_message(f"Awesome! I like {selecter.values[0]} too!")
 
+    async def button_callback(interaction):
+        await interaction.response.defer()
+        with io.BytesIO() as image_binary:
+            panel_img = await generate_panel()
+            panel_img.save(image_binary, 'PNG')
+            image_binary.seek(0)
+            await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
+
+    async def uid_change_button_callback(interaction):
+        modal = Modal(title="UID変更")
+        modal.add_item(discord.ui.InputText(label="UID"))
+
+        async def uid_change_modal_callback(modal_interaction):
+            await modal_interaction.response.defer()
+            info = await get_json_from_url(f"https://api.mihomo.me/sr_info/{modal.children[0].value}")
+            if "detail" not in info:
+                embed.description = f"ニックネーム: {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
+            else:
+                embed.description = "UIDが指定されていない、または存在しないUIDです。"
+
+            await ctx.edit(embed=embed)
+
+        modal.callback = uid_change_modal_callback
+        await interaction.response.send_modal(modal)
+
+
     selecter.callback = select_callback
     selecter.options = [discord.SelectOption(label="test")]
-    await ctx.send(view=View(selecter))
-    return
-    await generate_panel()
+    selecter.custom_id = "check_id"
+    generate_button.label = "パネル生成"
+    generate_button.callback = button_callback
+    generate_button.row = 4
+    generate_button.style = discord.ButtonStyle.primary
+    uid_change_button.label = "UID変更"
+    uid_change_button.callback = uid_change_button_callback
+    uid_change_button.row = 4
     embed = discord.Embed(
-        title="崩壊スターレイル",
+        title="HSR パネル生成",
         color=discord.Colour.dark_blue(),
-        description="満員で入れないのだ。",
+        description="UIDが指定されていない、または存在しないUIDです。",
     )
-    embed.set_image(url="attachment://image.png")
-    with io.BytesIO() as image_binary:
-        panel_img = await generate_panel()
-        panel_img.save(image_binary, 'PNG')
-        image_binary.seek(0)
-
+    await ctx.send_followup(embed=embed, view=View(selecter, generate_button, uid_change_button))
+    return
 
 
 @bot.event
 async def on_ready():
     print("起動しました")
-    #await generate_panel()
+    # await generate_panel()
 
 
-async def generate_panel():
+async def generate_panel(uid=805477392, chara_id=1):
     font_color = "#f0eaca"
     touka_color = "#191919"
-    json = await get_json_from_url("https://api.mihomo.me/sr_info_parsed/805477392?lang=jp")
-    helta_json = json["characters"][1]
+    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
+    helta_json = json["characters"][int(chara_id)]
     img = Image.open(
         await get_image_from_url("http://10grove.moo.jp/blog/wp-content/uploads/2015/08/seiun19201080.jpg")).convert(
         'RGBA')
@@ -139,7 +181,8 @@ async def generate_panel():
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['element']['icon']}")).resize(
         (55, 55))
     img.paste(icon, (500 + (len(helta_json['name'])) * 60, 70), icon)
-    draw.text((500 + (len(helta_json['name'])) * 60 + 55, 90), f"Lv.{helta_json['level']}", font_color, font=normal_font)
+    draw.text((500 + (len(helta_json['name'])) * 60 + 55, 90), f"Lv.{helta_json['level']}", font_color,
+              font=normal_font)
     draw.line(((490, 135), (1060, 135)), fill=font_color, width=3)
     path_icon = Image.open(await get_image_from_url(
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['path']['icon']}")).resize(
@@ -231,10 +274,9 @@ async def generate_panel():
         draw.text((650, 930), f"{convert_old_roman_from_int(int(helta_json['light_cone']['promotion']))}", font_color,
                   font=card_font, anchor='ra')
 
-
     # UID
     draw.text((50, 1010), f"UID: {json['player']['uid']}", font_color,
-                  font=normal_font)
+              font=normal_font)
 
     # スキルレベル
     a = Image.new('RGBA', (1920, 1080))
@@ -251,14 +293,11 @@ async def generate_panel():
             (45, 45))
         img.paste(skill_icon, (70 + index * 63, 722), skill_icon)
         draw.ellipse(((65 + index * 63, 715), (120 + index * 63, 770)), fill=None,
-                               outline=font_color, width=3)
+                     outline=font_color, width=3)
         draw.rounded_rectangle((73 + index * 63, 762, 112 + index * 63, 788), radius=10, fill="#ffffff",
                                outline="#ffffff", width=2)
         draw.text((85 + index * 63, 760), f"{i['level']}", "#000000",
                   font=normal_font)
-
-
-
 
     img.save('lenna_square_pillow.png', quality=95)
     return img
@@ -300,7 +339,7 @@ def convert_old_roman_from_int(n):
     r = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X']
     if n < 1 or 10 < n:
         return ''
-    return r[n-1]
+    return r[n - 1]
 
 
 bot.run(token)
