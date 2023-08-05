@@ -16,3 +16,5 @@ jobs:
           script: |
             cd HonkaiStarRailDiscordBot
             git pull
+            python3.11 -m pip install -r requirements.txt
+            systemctl restart honkai.service
