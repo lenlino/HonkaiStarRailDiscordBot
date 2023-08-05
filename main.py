@@ -1,19 +1,20 @@
 import io
+import os
+import pathlib
 
 import aiohttp
 import asyncpg as asyncpg
 import discord
 from PIL import Image, ImageDraw, ImageFont
-import numpy as np
 
 bot = discord.AutoShardedBot()
-token = ''
-font_file_path = "C:/Users/lenli/AppData/Local/Microsoft/Windows/Fonts/zh-cn.ttf"
+token = os.environ.get('HONKAI_TOKEN')
+font_file_path = "assets/zh-cn.ttf"
 DB_HOST = 'localhost'
 DB_PORT = '5433'
 DB_NAME = 'postgres'
 DB_USER = 'postgres'
-DB_PASS = ''
+DB_PASS = os.getenv("DB_PASS", "maikura123")
 
 
 async def init_bot():
@@ -39,23 +40,38 @@ class Modal(discord.ui.Modal):
 
 
 @bot.slash_command(description="読み上げを開始・終了するのだ", guilds=["864441028866080768"])
-async def panel(ctx):
+async def panel(ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
     await ctx.defer()
-
     selecter = Select()
     generate_button = Button()
     uid_change_button = Button()
+    select_number = 0
 
-    async def select_callback(interaction):
-        await interaction.response.send_message(f"Awesome! I like {selecter.values[0]} too!")
+    async def selector_callback(interaction):
+        try:
+            await interaction.response.send_message("")
+        except discord.errors.HTTPException:
+            pass
 
     async def button_callback(interaction):
         await interaction.response.defer()
+        if selecter.options[0].label == "UID未設定":
+            await interaction.followup.send("UIDが設定されていません。")
+            return
         with io.BytesIO() as image_binary:
-            panel_img = await generate_panel()
+            generate_button.label = "生成中..."
+            generate_button.disabled = True
+            print(uid)
+            await ctx.edit(view=View(selecter, generate_button, uid_change_button))
+            panel_img = await generate_panel(uid=uid, chara_id=int(selecter.values[0]))
+            nonlocal select_number
+            select_number = int(selecter.values[0])
             panel_img.save(image_binary, 'PNG')
             image_binary.seek(0)
             await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
+            generate_button.label = "パネル生成"
+            generate_button.disabled = False
+            await set_uid(uid)
 
     async def uid_change_button_callback(interaction):
         modal = Modal(title="UID変更")
@@ -63,20 +79,31 @@ async def panel(ctx):
 
         async def uid_change_modal_callback(modal_interaction):
             await modal_interaction.response.defer()
-            info = await get_json_from_url(f"https://api.mihomo.me/sr_info/{modal.children[0].value}")
-            if "detail" not in info:
-                embed.description = f"ニックネーム: {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
-            else:
-                embed.description = "UIDが指定されていない、または存在しないUIDです。"
-
-            await ctx.edit(embed=embed)
+            await set_uid(modal.children[0].value)
 
         modal.callback = uid_change_modal_callback
         await interaction.response.send_modal(modal)
 
+    async def set_uid(changed_uid):
+        info = await get_json_from_url(f"https://api.mihomo.me/sr_info/{changed_uid}")
+        if "detail" not in info:
+            embed.description = f"ニックネーム: {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
+            nonlocal uid
+            uid = info['detailInfo']['uid']
+            json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
+            selecter.options = []
+            for index, i in enumerate(json["characters"]):
+                selecter.append_option(
+                    discord.SelectOption(label=i["name"], value=str(index), default=True if index == select_number else False))
+            await ctx.edit(view=View(selecter, generate_button, uid_change_button))
+        else:
+            embed.description = "UIDが指定されていない、または存在しないUIDです。"
 
-    selecter.callback = select_callback
-    selecter.options = [discord.SelectOption(label="test")]
+        await ctx.edit(embed=embed)
+
+
+    selecter.callback = selector_callback
+    selecter.options = [discord.SelectOption(label="UID未設定",default=True)]
     selecter.custom_id = "check_id"
     generate_button.label = "パネル生成"
     generate_button.callback = button_callback
@@ -88,9 +115,11 @@ async def panel(ctx):
     embed = discord.Embed(
         title="HSR パネル生成",
         color=discord.Colour.dark_blue(),
-        description="UIDが指定されていない、または存在しないUIDです。",
+        description="読み込み中...",
     )
+
     await ctx.send_followup(embed=embed, view=View(selecter, generate_button, uid_change_button))
+    await set_uid(uid)
     return
 
 
@@ -100,13 +129,12 @@ async def on_ready():
     # await generate_panel()
 
 
-async def generate_panel(uid=805477392, chara_id=1):
+async def generate_panel(uid="805477392", chara_id=1):
     font_color = "#f0eaca"
     touka_color = "#191919"
     json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
     helta_json = json["characters"][int(chara_id)]
-    img = Image.open(
-        await get_image_from_url("http://10grove.moo.jp/blog/wp-content/uploads/2015/08/seiun19201080.jpg")).convert(
+    img = Image.open("assets/black.png").convert(
         'RGBA')
     color_code = helta_json["element"]["color"]
     a = Image.new('RGBA', (1920, 1080))
@@ -197,7 +225,6 @@ async def generate_panel(uid=805477392, chara_id=1):
 
     # 聖遺物
     for index, i in enumerate(helta_json["relics"]):
-        print(i)
         icon = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
             (100, 100))
@@ -299,14 +326,21 @@ async def generate_panel(uid=805477392, chara_id=1):
         draw.text((85 + index * 63, 760), f"{i['level']}", "#000000",
                   font=normal_font)
 
-    img.save('lenna_square_pillow.png', quality=95)
+    #img.save('lenna_square_pillow.png', quality=95)
     return img
 
 
 async def get_image_from_url(url: str):
+    replaced_path = url.replace("https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/","")
+    if url.startswith("https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/") and os.path.exists(replaced_path):
+        return replaced_path
+    print(replaced_path)
+    filepath = pathlib.Path(replaced_path)
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            return io.BytesIO(await response.content.read())
+            Image.open(io.BytesIO(await response.content.read())).save(filepath, quality=95)
+            return replaced_path
 
 
 async def get_json_from_url(url: str):
