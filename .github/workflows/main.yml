@@ -14,5 +14,5 @@ jobs:
           username: ${{ secrets.USER }}
           password: ${{ secrets.SECRET_KEY }}
           script: |
-            cd 
+            cd HonkaiStarRailDiscordBot
             git pull
