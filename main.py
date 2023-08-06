@@ -134,7 +134,7 @@ async def generate_panel(uid="805477392", chara_id=1):
     touka_color = "#191919"
     json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
     helta_json = json["characters"][int(chara_id)]
-    img = Image.open("assets/black.png").convert(
+    img = Image.open(f"{os.getcwd()}/assets/black.png").convert(
         'RGBA')
     color_code = helta_json["element"]["color"]
     a = Image.new('RGBA', (1920, 1080))
@@ -332,10 +332,10 @@ async def generate_panel(uid="805477392", chara_id=1):
 
 async def get_image_from_url(url: str):
     replaced_path = url.replace("https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/","")
-    if url.startswith("https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/") and os.path.exists(replaced_path):
-        return replaced_path
-    print(replaced_path)
-    filepath = pathlib.Path(replaced_path)
+    if url.startswith("https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/") and os.path.exists(f"{os.getcwd()}/{replaced_path}"):
+        return f"{os.getcwd()}/{replaced_path}"
+    print(f"{os.getcwd()}/{replaced_path}")
+    filepath = pathlib.Path(f"{os.getcwd()}/{replaced_path}")
     filepath.parent.mkdir(parents=True, exist_ok=True)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
