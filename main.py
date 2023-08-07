@@ -39,8 +39,8 @@ class Modal(discord.ui.Modal):
     pass
 
 
-@bot.slash_command(description="読み上げを開始・終了するのだ", guilds=["864441028866080768"])
-async def panel(ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
+@bot.slash_command(description="カードを生成します")
+async def card(ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
     await ctx.defer()
     selecter = Select()
     generate_button = Button()
