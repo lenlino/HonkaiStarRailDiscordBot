@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 bot = discord.AutoShardedBot()
 token = os.environ.get('HONKAI_TOKEN')
-font_file_path = "assets/zh-cn.ttf"
+font_file_path = f"{os.path.dirname(os.path.abspath(__file__))}/assets/zh-cn.ttf"
 DB_HOST = 'localhost'
 DB_PORT = '5433'
 DB_NAME = 'postgres'
