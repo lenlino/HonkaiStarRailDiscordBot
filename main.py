@@ -340,7 +340,7 @@ async def get_image_from_url(url: str):
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             Image.open(io.BytesIO(await response.content.read())).save(filepath, quality=95)
-            return replaced_path
+            return f"{os.path.dirname(os.path.abspath(__file__))}/{replaced_path}"
 
 
 async def get_json_from_url(url: str):
