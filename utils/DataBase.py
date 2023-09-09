@@ -3,10 +3,10 @@ import os
 import asyncpg
 
 DB_HOST = 'localhost'
-DB_PORT = '5432'
+DB_PORT = os.environ.get("DB_PORT", 5432)
 DB_NAME = 'postgres'
 DB_USER = 'postgres'
-DB_PASS = os.getenv("DB_PASS", "maikura123")
+DB_PASS = os.environ.get("DB_PASS", "dbpass")
 
 pool = None
 
