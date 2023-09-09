@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 from discord.ui import Select, Button, Modal, View
 
+import utils.DataBase
 from generate.generate import generate_panel, get_json_from_url
 
 
@@ -43,6 +44,7 @@ class CardCommand(commands.Cog):
                 generate_button.label = "生成中..."
                 generate_button.disabled = True
                 print(uid)
+                await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
                 await ctx.edit(view=View(selecter, generate_button, uid_change_button))
                 panel_img = await generate_panel(uid=uid, chara_id=int(selecter.values[0]))
                 nonlocal select_number
@@ -100,6 +102,8 @@ class CardCommand(commands.Cog):
         )
 
         await ctx.send_followup(embed=embed, view=View(selecter, generate_button, uid_change_button))
+        if uid is None:
+            uid = await utils.DataBase.getdatabase(ctx.user.id, "uid")
         await set_uid(uid)
         return
 
