@@ -49,6 +49,6 @@ async def setdatabase(userid, id, value, table="honkai_user"):
         rows = await conn.fetchrow(f'SELECT {id} from {table} where "id" = $1;', (str(userid)))
         if rows is None:
             await conn.execute('INSERT INTO honkai_user (id) VALUES ($1);', (str(userid)))
-            rows = await conn.fetchrow('SELECT voiceid from honkai_user where id = $1;', (str(userid)))
+            rows = await conn.fetchrow('SELECT uid from honkai_user where id = $1;', (str(userid)))
         await conn.execute(f'UPDATE {table} SET {id} = $1 WHERE "id" = $2;', value, str(userid))
         return rows[0]
