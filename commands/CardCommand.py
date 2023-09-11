@@ -31,6 +31,8 @@ class CardCommand(commands.Cog):
 
         async def selector_callback(interaction):
             try:
+                nonlocal select_number
+                select_number = int(selecter.values[0])
                 await interaction.response.send_message("")
             except discord.errors.HTTPException:
                 pass
@@ -46,9 +48,8 @@ class CardCommand(commands.Cog):
                 print(uid)
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
                 await ctx.edit(view=View(selecter, generate_button, uid_change_button))
-                panel_img = await generate_panel(uid=uid, chara_id=int(selecter.values[0]))
                 nonlocal select_number
-                select_number = int(selecter.values[0])
+                panel_img = await generate_panel(uid=uid, chara_id=int(select_number))
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 await interaction.followup.send(file=discord.File(image_binary, "panel.png"))

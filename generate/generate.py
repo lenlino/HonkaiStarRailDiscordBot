@@ -1,4 +1,5 @@
 import io
+import json
 import os
 import pathlib
 
@@ -25,10 +26,13 @@ async def generate_panel(uid="805477392", chara_id=1):
     img = Image.alpha_composite(img, a)
     # img = img.rotate(90, expand=True)
     small_font = ImageFont.truetype(font_file_path, 18)
+    skill_level_font = ImageFont.truetype(font_file_path, 25)
     normal_font = ImageFont.truetype(font_file_path, 30)
     title_font = ImageFont.truetype(font_file_path, 60)
     retic_title_font = ImageFont.truetype(font_file_path, 25)
-    retic_title_small_font = ImageFont.truetype(font_file_path, 19)
+    retic_main_affix_title_font = ImageFont.truetype(font_file_path, 27)
+    retic_main_affix_title_small_font = ImageFont.truetype(font_file_path, 25)
+    retic_title_small2_font = ImageFont.truetype(font_file_path, 20)
     card_font = ImageFont.truetype(font_file_path, 36)
 
     draw = ImageDraw.Draw(img)
@@ -94,15 +98,12 @@ async def generate_panel(uid="805477392", chara_id=1):
     path_icon = Image.open(await get_image_from_url(
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['path']['icon']}")).resize(
         (50, 50))
-    img.paste(path_icon, (914, 80), path_icon)
-    draw.text((964, 90), f"{helta_json['path']['name']}", font_color, font=normal_font)
-    draw.rounded_rectangle((919, 82, 1014, 127), radius=2, fill=None,
-                           outline=font_color, width=2)
-    draw.text((1029, 90), f"{helta_json['promotion']}", font_color, font=normal_font)
-    draw.rounded_rectangle((1019, 82, 1051, 127), radius=2, fill=None,
+    img.paste(path_icon, (960, 80), path_icon)
+    draw.text((1035, 105), f"{helta_json['promotion']}", font_color, font=normal_font, anchor="mm")
+    draw.rounded_rectangle((1020, 82, 1050, 127), radius=2, fill=None,
                            outline=font_color, width=2)
 
-    # 聖遺物
+    # 遺物
     for index, i in enumerate(helta_json["relics"]):
         icon = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
@@ -110,24 +111,25 @@ async def generate_panel(uid="805477392", chara_id=1):
         star_img = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(5)}")).resize(
             (153, 36))
+        relic_score = round(await get_relic_score(helta_json["id"], i) * 100, 1)
         if index < 3:
             draw.rounded_rectangle((1100, 50 + index * 330, 1490, 365 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
             img.paste(icon, (1110, 60 + index * 330), icon)
-            if len(i["name"]) > 11:
-                draw.text((1220, 60 + index * 330), f"{i['name'][:11]}\n{i['name'][11:]}", font_color,
-                          align='left',
-                          font=retic_title_small_font)
-            else:
-                draw.text((1220, 70 + index * 330), f"{i['name']}", font_color, spacing=10, align='left',
-                          font=retic_title_font)
 
-            draw.text((1240, 110 + index * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}", font_color,
-                      font=retic_title_font)
+            draw.text((1220, 70 + index * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}", font_color,
+                      font=retic_main_affix_title_font)
             draw.rounded_rectangle((1187, 145 + index * 330, 1235, 173 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
-            draw.text((1190, 145 + index * 330), f"+{i['level']}", font_color,
-                      font=retic_title_font)
+            draw.text((1210, 160 + index * 330), f"+{i['level']}", font_color,
+                      font=retic_title_font, anchor="mm")
+
+            # スコア
+            draw.text((1440, 135 + index * 330), f"{relic_score}", font_color,
+                      font=retic_title_font, anchor="mm")
+            draw.text((1440, 95 + index * 330), f"{get_relic_score_text(relic_score)}", font_color,
+                      font=title_font, anchor="mm")
+
             img.paste(star_img, (1070, 145 + index * 330), star_img)
             for sub_index, sub_i in enumerate(i["sub_affix"]):
                 draw.text((1110, 180 + index * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
@@ -138,21 +140,25 @@ async def generate_panel(uid="805477392", chara_id=1):
             draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
             img.paste(icon, (1510, 60 + (index - 3) * 330), icon)
-            if len(i["name"]) > 11:
-                draw.text((1610, 60 + (index - 3) * 330), f"{i['name'][:11]}\n{i['name'][11:]}", font_color,
-                          align='left',
-                          font=retic_title_small_font)
-            else:
-                draw.text((1610, 70 + (index - 3) * 330), f"{i['name']}", font_color, spacing=10, align='left',
-                          font=retic_title_font)
 
-            draw.text((1640, 110 + (index - 3) * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}",
-                      font_color,
-                      font=retic_title_font)
+            if len(i['main_affix']['name']) >= 8:
+                draw.text((1610, 70 + (index - 3) * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}",
+                          font_color, font=retic_main_affix_title_small_font)
+            else:
+                draw.text((1620, 70 + (index - 3) * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}",
+                          font_color, font=retic_main_affix_title_font)
+
             draw.rounded_rectangle((1587, 145 + (index - 3) * 330, 1635, 173 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
-            draw.text((1590, 145 + (index - 3) * 330), f"+{i['level']}", font_color,
-                      font=retic_title_font)
+            draw.text((1610, 160 + (index - 3) * 330), f"+{i['level']}", font_color,
+                      font=retic_title_font, anchor="mm")
+
+            # スコア
+            draw.text((1840, 135 + (index - 3) * 330), f"{relic_score}", font_color,
+                      font=retic_title_font, anchor="mm")
+            draw.text((1840, 95 + (index - 3) * 330), f"{get_relic_score_text(relic_score)}", font_color,
+                      font=title_font, anchor="mm")
+
             img.paste(star_img, (1470, 145 + (index - 3) * 330), star_img)
             for sub_index, sub_i in enumerate(i["sub_affix"]):
                 draw.text((1510, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
@@ -193,17 +199,30 @@ async def generate_panel(uid="805477392", chara_id=1):
     )
     img = Image.alpha_composite(img, a)
     draw = ImageDraw.Draw(img)
+    skill_index = 0
+    used_ultra = False
+    used_normal = False
     for index, i in enumerate(helta_json["skills"]):
+        if i["max_level"] == 1 and i["type"] != "Maze":
+            continue
+        if i["type"] == "Ultra":
+            if used_ultra:
+                continue
+            used_ultra = True
+        elif i["type"] == "Normal":
+            if used_normal:
+                continue
+            used_normal = True
         skill_icon = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
             (45, 45))
-        img.paste(skill_icon, (70 + index * 63, 722), skill_icon)
-        draw.ellipse(((65 + index * 63, 715), (120 + index * 63, 770)), fill=None,
+        img.paste(skill_icon, (70 + skill_index * 78, 722), skill_icon)
+        draw.ellipse(((65 + skill_index * 78, 715), (120 + skill_index * 78, 770)), fill=None,
                      outline=font_color, width=3)
-        draw.rounded_rectangle((73 + index * 63, 762, 112 + index * 63, 788), radius=2, fill="#ffffff",
-                               outline="#ffffff", width=2)
-        draw.text((85 + index * 63, 760), f"{i['level']}", "#000000",
-                  font=normal_font)
+        draw.rounded_rectangle((73 + skill_index * 78, 762, 112 + skill_index * 78, 788), radius=4, fill="#ffffff")
+        draw.text((93 + skill_index * 78, 775), f"{i['level']}", "#000000",
+                  font=skill_level_font, align="center", anchor="mm")
+        skill_index += 1
 
     # img.save('lenna_square_pillow.png', quality=95)
     return img
@@ -254,3 +273,54 @@ def convert_old_roman_from_int(n):
     if n < 1 or 10 < n:
         return ''
     return r[n - 1]
+
+
+async def get_relic_score(chara_id, relic_json):
+    # load
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
+        weight_json = json.load(f)
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/max.json") as f:
+        max_json = json.load(f)
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/relic_id.json") as f:
+        relic_id_json = json.load(f)
+
+    # メインの計算
+    main_affix_score = (relic_json["level"] + 1) / 16 * weight_json[chara_id]["main"][relic_id_json.get(relic_json["id"], relic_json["id"])[-1]][relic_json["main_affix"]["type"]]
+
+
+    # サブの計算
+    sub_affix_score = 0
+    for sub_affix_json in relic_json["sub_affix"]:
+        sub_affix_type = sub_affix_json["type"]
+        sub_affix_score += sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
+
+    # 合計
+    return main_affix_score * 0.5 + sub_affix_score * 0.5
+
+
+def get_relic_score_color(score):
+    if score <= 19:
+        return "#888c91"
+    elif 20 <= score <= 39:
+        return "#428c88"
+    elif 40 <= score <= 59:
+        return "#4c88c8"
+    elif 60 <= score <= 79:
+        return "#a068d8"
+    elif 80 <= score:
+        return "#d2ad72"
+
+
+def get_relic_score_text(score):
+    if score <= 19:
+        return "D"
+    elif 20 <= score <= 39:
+        return "C"
+    elif 40 <= score <= 59:
+        return "B"
+    elif 60 <= score <= 79:
+        return "A"
+    elif 80 <= score <= 99:
+        return "S"
+    elif 100 <= score:
+        return "SS"
