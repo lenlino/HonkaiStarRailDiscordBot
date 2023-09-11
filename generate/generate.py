@@ -12,7 +12,7 @@ font_file_path = f"{os.path.dirname(os.path.abspath(__file__))}/assets/zh-cn.ttf
 async def generate_panel(uid="805477392", chara_id=1):
     font_color = "#f0eaca"
     touka_color = "#191919"
-    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
+    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=en")
     helta_json = json["characters"][int(chara_id)]
     img = Image.open(f"{os.path.dirname(os.path.abspath(__file__))}/assets/bkg.png").convert(
         'RGBA')
@@ -204,6 +204,7 @@ async def generate_panel(uid="805477392", chara_id=1):
     draw = ImageDraw.Draw(img)
     skill_index = 0
     used_ultra = False
+    used_normal = False
     for index, i in enumerate(helta_json["skills"]):
         if i["max_level"] == 1 and i["type"] != "Maze":
             continue
@@ -211,6 +212,10 @@ async def generate_panel(uid="805477392", chara_id=1):
             if used_ultra:
                 continue
             used_ultra = True
+        elif i["type"] == "Normal":
+            if used_normal:
+                continue
+            used_normal = True
         skill_icon = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
             (45, 45))
@@ -281,15 +286,16 @@ async def get_relic_score(chara_id, relic_json):
         max_json = json.load(f)
 
     # メインの計算
-    main_affix_score = (relic_json["level"] + 1) / 16 * weight_json[chara_id]["main"][relic_json["id"][-1]][
-        relic_json["main_affix"]["type"]]
+    print(relic_json["main_affix"]["type"])
+    print(relic_json["id"][-1])
+    main_affix_score = (relic_json["level"] + 1) / 16 * weight_json[chara_id]["main"][relic_json["id"][-1]][relic_json["main_affix"]["type"]]
+
 
     # サブの計算
     sub_affix_score = 0
     for sub_affix_json in relic_json["sub_affix"]:
         sub_affix_type = sub_affix_json["type"]
-        sub_affix_score += sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][
-            sub_affix_type]
+        sub_affix_score += sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
 
     # 合計
     return main_affix_score * 0.5 + sub_affix_score * 0.5
