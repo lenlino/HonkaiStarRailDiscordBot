@@ -121,8 +121,8 @@ async def generate_panel(uid="805477392", chara_id=1):
                       font=retic_main_affix_title_font)
             draw.rounded_rectangle((1187, 145 + index * 330, 1235, 173 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
-            draw.text((1190, 145 + index * 330), f"+{i['level']}", font_color,
-                      font=retic_title_font)
+            draw.text((1210, 160 + index * 330), f"+{i['level']}", font_color,
+                      font=retic_title_font, anchor="mm")
 
             # スコア
             draw.text((1440, 135 + index * 330), f"{relic_score}", font_color,
@@ -150,8 +150,8 @@ async def generate_panel(uid="805477392", chara_id=1):
 
             draw.rounded_rectangle((1587, 145 + (index - 3) * 330, 1635, 173 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
-            draw.text((1590, 145 + (index - 3) * 330), f"+{i['level']}", font_color,
-                      font=retic_title_font)
+            draw.text((1610, 160 + (index - 3) * 330), f"+{i['level']}", font_color,
+                      font=retic_title_font, anchor="mm")
 
             # スコア
             draw.text((1840, 135 + (index - 3) * 330), f"{relic_score}", font_color,
