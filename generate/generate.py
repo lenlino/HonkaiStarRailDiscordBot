@@ -26,6 +26,7 @@ async def generate_panel(uid="805477392", chara_id=1):
     img = Image.alpha_composite(img, a)
     # img = img.rotate(90, expand=True)
     small_font = ImageFont.truetype(font_file_path, 18)
+    skill_level_font = ImageFont.truetype(font_file_path, 25)
     normal_font = ImageFont.truetype(font_file_path, 30)
     title_font = ImageFont.truetype(font_file_path, 60)
     retic_title_font = ImageFont.truetype(font_file_path, 25)
@@ -201,17 +202,25 @@ async def generate_panel(uid="805477392", chara_id=1):
     )
     img = Image.alpha_composite(img, a)
     draw = ImageDraw.Draw(img)
+    skill_index = 0
+    used_ultra = False
     for index, i in enumerate(helta_json["skills"]):
+        if i["max_level"] == 1 and i["type"] != "Maze":
+            continue
+        if i["type"] == "Ultra":
+            if used_ultra:
+                continue
+            used_ultra = True
         skill_icon = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
             (45, 45))
-        img.paste(skill_icon, (70 + index * 63, 722), skill_icon)
-        draw.ellipse(((65 + index * 63, 715), (120 + index * 63, 770)), fill=None,
+        img.paste(skill_icon, (70 + skill_index * 78, 722), skill_icon)
+        draw.ellipse(((65 + skill_index * 78, 715), (120 + skill_index * 78, 770)), fill=None,
                      outline=font_color, width=3)
-        draw.rounded_rectangle((73 + index * 63, 762, 112 + index * 63, 788), radius=2, fill="#ffffff",
-                               outline="#ffffff", width=2)
-        draw.text((85 + index * 63, 760), f"{i['level']}", "#000000",
-                  font=normal_font)
+        draw.rounded_rectangle((73 + skill_index * 78, 762, 112 + skill_index * 78, 788), radius=4, fill="#ffffff")
+        draw.text((93 + skill_index * 78, 775), f"{i['level']}", "#000000",
+                  font=skill_level_font, align="center", anchor="mm")
+        skill_index += 1
 
     # img.save('lenna_square_pillow.png', quality=95)
     return img
