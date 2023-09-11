@@ -12,7 +12,7 @@ font_file_path = f"{os.path.dirname(os.path.abspath(__file__))}/assets/zh-cn.ttf
 async def generate_panel(uid="805477392", chara_id=1):
     font_color = "#f0eaca"
     touka_color = "#191919"
-    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=en")
+    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
     helta_json = json["characters"][int(chara_id)]
     img = Image.open(f"{os.path.dirname(os.path.abspath(__file__))}/assets/bkg.png").convert(
         'RGBA')
@@ -98,12 +98,9 @@ async def generate_panel(uid="805477392", chara_id=1):
     path_icon = Image.open(await get_image_from_url(
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['path']['icon']}")).resize(
         (50, 50))
-    img.paste(path_icon, (914, 80), path_icon)
-    draw.text((964, 90), f"{helta_json['path']['name']}", font_color, font=normal_font)
-    draw.rounded_rectangle((919, 82, 1014, 127), radius=2, fill=None,
-                           outline=font_color, width=2)
-    draw.text((1029, 90), f"{helta_json['promotion']}", font_color, font=normal_font)
-    draw.rounded_rectangle((1019, 82, 1051, 127), radius=2, fill=None,
+    img.paste(path_icon, (960, 80), path_icon)
+    draw.text((1035, 105), f"{helta_json['promotion']}", font_color, font=normal_font, anchor="mm")
+    draw.rounded_rectangle((1020, 82, 1050, 127), radius=2, fill=None,
                            outline=font_color, width=2)
 
     # 遺物
@@ -284,11 +281,11 @@ async def get_relic_score(chara_id, relic_json):
         weight_json = json.load(f)
     with open(f"{os.path.dirname(os.path.abspath(__file__))}/max.json") as f:
         max_json = json.load(f)
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/relic_id.json") as f:
+        relic_id_json = json.load(f)
 
     # メインの計算
-    print(relic_json["main_affix"]["type"])
-    print(relic_json["id"][-1])
-    main_affix_score = (relic_json["level"] + 1) / 16 * weight_json[chara_id]["main"][relic_json["id"][-1]][relic_json["main_affix"]["type"]]
+    main_affix_score = (relic_json["level"] + 1) / 16 * weight_json[chara_id]["main"][relic_id_json.get(relic_json["id"], relic_json["id"])[-1]][relic_json["main_affix"]["type"]]
 
 
     # サブの計算
