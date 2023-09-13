@@ -1,5 +1,6 @@
 import io
 import json
+import math
 import os
 import pathlib
 
@@ -65,10 +66,16 @@ async def generate_panel(uid="805477392", chara_id=1):
             draw.text((1050, 150 + index * 60 + 18), f"+{addition.get('display', '0')}", "#9be802", spacing=10,
                       align='right',
                       font=small_font, anchor='ra')
-            draw.text((1000, 150 + index * 60), f"{int(i['display']) + int(addition.get('display', '0'))}", font_color,
+            draw.text((980, 150 + index * 60), f"{int(i['display']) + int(addition.get('display', '0'))}", font_color,
                       font=normal_font, anchor='ra')
         else:
             draw.text((1050, 150 + index * 60), f"{i['display']}", font_color, spacing=10, align='right',
+                      font=small_font, anchor='ra')
+            addition = get_json_from_json(helta_json["additions"], "field", i["field"])
+            draw.text((1050, 150 + index * 60 + 18), f"+{addition.get('display', '0')}", "#9be802", spacing=10,
+                      align='right',
+                      font=small_font, anchor='ra')
+            draw.text((980, 150 + index * 60), f"{math.floor((float(i['value']) + float(addition.get('value', '0')))*1000)/10}%", font_color,
                       font=normal_font, anchor='ra')
     show_count = 0
     for index, i in enumerate(helta_json["properties"]):
