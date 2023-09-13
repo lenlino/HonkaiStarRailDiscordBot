@@ -319,15 +319,15 @@ def get_relic_score_color(score):
 
 
 def get_relic_score_text(score):
-    if score <= 19:
+    if score < 20:
         return "D"
-    elif 20 <= score <= 39:
+    elif 20 <= score < 40:
         return "C"
-    elif 40 <= score <= 59:
+    elif 40 <= score < 60:
         return "B"
-    elif 60 <= score <= 79:
+    elif 60 <= score < 80:
         return "A"
-    elif 80 <= score <= 99:
+    elif 80 <= score < 100:
         return "S"
     elif 100 <= score:
         return "SS"
