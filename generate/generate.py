@@ -116,7 +116,7 @@ async def generate_panel(uid="805477392", chara_id=1):
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
             (100, 100))
         star_img = Image.open(await get_image_from_url(
-            f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(5)}")).resize(
+            f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(i['rarity'])}")).resize(
             (153, 36))
         relic_score = round(await get_relic_score(helta_json["id"], i) * 100, 1)
         if index < 3:
