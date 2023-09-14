@@ -10,7 +10,12 @@ from generate.generate import generate_panel, get_json_from_url
 
 class CardCommand(commands.Cog):
     class View(discord.ui.View):
-        pass
+        def __init__(self):
+            super().__init__(timeout=600)  # timeout of the view must be set to None
+
+        async def on_timeout(self):
+            self.disable_all_items()
+            await self.message.edit(content="You took too long! Disabled all the components.", view=self)
 
     class Select(discord.ui.Select):
         pass
@@ -37,6 +42,7 @@ class CardCommand(commands.Cog):
             except discord.errors.HTTPException:
                 pass
 
+
         async def button_callback(interaction):
             await interaction.response.defer()
             if selecter.options[0].label == "UID未設定":
@@ -47,7 +53,7 @@ class CardCommand(commands.Cog):
                 generate_button.disabled = True
                 print(uid)
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
-                await ctx.edit(view=View(selecter, generate_button, uid_change_button))
+                await ctx.edit(view=View(selecter, generate_button, uid_change_button, timeout=600))
                 nonlocal select_number
                 panel_img = await generate_panel(uid=uid, chara_id=int(select_number))
                 panel_img.save(image_binary, 'PNG')
@@ -80,7 +86,7 @@ class CardCommand(commands.Cog):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
-                await ctx.edit(view=View(selecter, generate_button, uid_change_button))
+                await ctx.edit(view=View(selecter, generate_button, uid_change_button, timeout=600))
             else:
                 embed.description = "UIDが指定されていない、または存在しないUIDです。"
 
@@ -102,7 +108,7 @@ class CardCommand(commands.Cog):
             description="読み込み中...",
         )
 
-        await ctx.send_followup(embed=embed, view=View(selecter, generate_button, uid_change_button))
+        await ctx.send_followup(embed=embed, view=View(selecter, generate_button, uid_change_button, timeout=600))
         if uid is None:
             uid = await utils.DataBase.getdatabase(ctx.user.id, "uid")
         await set_uid(uid)
