@@ -33,7 +33,7 @@ async def generate_panel(uid="805477392", chara_id=1):
     retic_title_font = ImageFont.truetype(font_file_path, 25)
     retic_main_affix_title_font = ImageFont.truetype(font_file_path, 27)
     retic_main_affix_title_small_font = ImageFont.truetype(font_file_path, 25)
-    retic_title_small2_font = ImageFont.truetype(font_file_path, 20)
+    retic_formula_font = ImageFont.truetype(font_file_path, 18)
     card_font = ImageFont.truetype(font_file_path, 36)
 
     draw = ImageDraw.Draw(img)
@@ -118,7 +118,8 @@ async def generate_panel(uid="805477392", chara_id=1):
         star_img = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(i['rarity'])}")).resize(
             (153, 36))
-        relic_score = round(await get_relic_score(helta_json["id"], i) * 100, 1)
+        relic_score_json = await get_relic_score(helta_json["id"], i)
+        relic_score = round(relic_score_json["score"] * 100, 1)
         if index < 3:
             draw.rounded_rectangle((1100, 50 + index * 330, 1490, 365 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
@@ -126,6 +127,7 @@ async def generate_panel(uid="805477392", chara_id=1):
 
             draw.text((1220, 70 + index * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}", font_color,
                       font=retic_main_affix_title_font)
+
             draw.rounded_rectangle((1187, 145 + index * 330, 1235, 173 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
             draw.text((1210, 160 + index * 330), f"+{i['level']}", font_color,
@@ -143,6 +145,8 @@ async def generate_panel(uid="805477392", chara_id=1):
                           font=retic_title_font)
                 draw.text((1480, 180 + index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
+                draw.text((1480, 160 + index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                          "#808080", font=retic_formula_font, anchor='ra')
         else:
             draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
@@ -170,8 +174,10 @@ async def generate_panel(uid="805477392", chara_id=1):
             for sub_index, sub_i in enumerate(i["sub_affix"]):
                 draw.text((1510, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
                           font=retic_title_font)
-                draw.text((1870, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
+                draw.text((1880, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
+                draw.text((1880, 160 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                          "#808080", font=retic_formula_font, anchor='ra')
 
     # カード
     if helta_json.get("light_cone"):
@@ -290,19 +296,28 @@ async def get_relic_score(chara_id, relic_json):
         max_json = json.load(f)
     with open(f"{os.path.dirname(os.path.abspath(__file__))}/relic_id.json") as f:
         relic_id_json = json.load(f)
+    result_json = {}
 
     # メインの計算
-    main_affix_score = (relic_json["level"] + 1) / 16 * weight_json[chara_id]["main"][relic_id_json.get(relic_json["id"], relic_json["id"])[-1]][relic_json["main_affix"]["type"]]
+    main_weight = weight_json[chara_id]["main"][relic_id_json.get(relic_json["id"], relic_json["id"])[-1]][relic_json["main_affix"]["type"]]
+    main_affix_score = (relic_json["level"] + 1) / 16 * main_weight
+    result_json["main_formula"] = f'{round((relic_json["level"] + 1) / 16*100, 1)}×{main_weight}={main_affix_score*100}'
 
 
     # サブの計算
     sub_affix_score = 0
+    sub_affix_formulas = []
     for sub_affix_json in relic_json["sub_affix"]:
         sub_affix_type = sub_affix_json["type"]
-        sub_affix_score += sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
+        score = sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
+        sub_affix_score += score
+        sub_affix_formulas.append(f'{round(sub_affix_json["value"]/max_json[sub_affix_type]*100, 1)}×{round(weight_json[chara_id]["weight"][sub_affix_type],1)}')
+
+    result_json["score"] = main_affix_score * 0.5 + sub_affix_score * 0.5
+    result_json["sub_formulas"] = sub_affix_formulas
 
     # 合計
-    return main_affix_score * 0.5 + sub_affix_score * 0.5
+    return result_json
 
 
 def get_relic_score_color(score):
