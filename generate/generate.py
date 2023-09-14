@@ -232,7 +232,7 @@ async def generate_panel(uid="805477392", chara_id=1):
         skill_index += 1
 
     # img.save('lenna_square_pillow.png', quality=95)
-    return img
+    return img.resize((img.width // 2, img.height // 2))
 
 
 async def get_image_from_url(url: str):
