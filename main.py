@@ -29,7 +29,7 @@ async def on_ready():
 
 @tasks.loop(minutes=10)
 async def status_update_task():
-    text = f"正常稼働中　Servers: {str(len(bot.guilds))}"
+    text = f"Servers: {str(len(bot.guilds))}"
     await bot.change_presence(activity=discord.CustomActivity(text))
 
 
