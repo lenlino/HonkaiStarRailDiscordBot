@@ -34,11 +34,21 @@ class CardCommand(commands.Cog):
         calculation_selecter = Select()
         generate_button = Button()
         uid_change_button = Button()
+        uid_hide_button = Button()
         select_number = 0
         calculation_value = 0
+        is_uid_hide = False
 
         def get_view():
-            return View(selecter, calculation_selecter, generate_button, uid_change_button, timeout=600)
+            return View(selecter, calculation_selecter, generate_button, uid_change_button, uid_hide_button, timeout=600)
+
+        def update_uid_hide_button():
+            if is_uid_hide:
+                uid_hide_button.style = discord.ButtonStyle.green
+                uid_hide_button.label = "UID非表示:  ON"
+            else:
+                uid_hide_button.style = discord.ButtonStyle.gray
+                uid_hide_button.label = "UID非表示: OFF"
 
         async def selector_callback(interaction):
             try:
@@ -56,6 +66,16 @@ class CardCommand(commands.Cog):
             except discord.errors.HTTPException:
                 pass
 
+        async def uid_hide_button_callback(interaction):
+            try:
+                nonlocal is_uid_hide
+                is_uid_hide = not is_uid_hide
+                update_uid_hide_button()
+                await ctx.edit(view=get_view())
+                await interaction.response.send_message("")
+            except discord.errors.HTTPException:
+                pass
+
         async def button_callback(interaction):
             await interaction.response.defer()
             if selecter.options[0].label == "UID未設定":
@@ -68,7 +88,7 @@ class CardCommand(commands.Cog):
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
                 await ctx.edit(view=get_view())
                 nonlocal select_number
-                panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=2, is_hideUID=False
+                panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=2, is_hideUID=is_uid_hide
                                                  , calculating_standard=calculation_value)
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
@@ -119,6 +139,10 @@ class CardCommand(commands.Cog):
         calculation_selecter.callback = calculation_selector_callback
         calculation_selecter.options = [discord.SelectOption(label="相性基準", default=True, value="compatibility")]
         calculation_selecter.row = 1
+        uid_hide_button.row = 4
+        uid_hide_button.callback = uid_hide_button_callback
+        uid_hide_button.style = discord.ButtonStyle.gray
+        uid_hide_button.label = "UID非表示: OFF"
 
         embed = discord.Embed(
             title="Herta Card System",
