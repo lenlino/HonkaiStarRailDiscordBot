@@ -47,7 +47,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         (750, 750)).crop((150, 0, 550, 750))
     img.paste(chara_img, (50, 50), chara_img)
     draw.rounded_rectangle((50, 50, 450, 800), radius=2, fill=None,
-                           outline=font_color, width=2)
+                           outline=font_color, width=1)
     star_img = Image.open(await get_image_from_url(
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(int(helta_json['rarity']))}")).resize(
         (306, 72))
@@ -61,7 +61,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         img.paste(icon, (500, 140 + index * 60), icon)
         draw.text((560, 150 + index * 60), f"{i['name']}", font_color, spacing=10, align='left', font=normal_font)
         draw.rounded_rectangle((490, 145 + index * 60, 1060, 155 + index * 60 + 36), radius=2, fill=None,
-                               outline=font_color, width=2)
+                               outline=font_color, width=1)
         if i["field"] != "crit_rate" and i["field"] != "crit_dmg":
             draw.text((1050, 150 + index * 60), f"{i['display']}", font_color, spacing=10, align='right',
                       font=small_font, anchor='ra')
@@ -88,7 +88,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                 f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['icon']}")).resize(
                 (55, 55))
             draw.rounded_rectangle((490, 505 + show_count * 60, 1060, 515 + show_count * 60 + 36), radius=2, fill=None,
-                                   outline=font_color, width=2)
+                                   outline=font_color, width=1)
             img.paste(icon, (500, 500 + show_count * 60), icon)
             draw.text((560, 510 + show_count * 60), f"{i['name']}", font_color, spacing=10, align='left',
                       font=normal_font)
@@ -126,15 +126,15 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         relic_full_score += relic_score
         if index < 3:
             draw.rounded_rectangle((1100, 50 + index * 330, 1490, 365 + index * 330), radius=2, fill=None,
-                                   outline=font_color, width=2)
+                                   outline=font_color, width=1)
             img.paste(icon, (1110, 60 + index * 330), icon)
 
             draw.text((1220, 70 + index * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}", font_color,
                       font=retic_main_affix_title_font)
 
-            draw.rounded_rectangle((1187, 145 + index * 330, 1235, 173 + index * 330), radius=2, fill=None,
+            draw.rounded_rectangle((1195, 145 + index * 330, 1245, 173 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
-            draw.text((1210, 160 + index * 330), f"+{i['level']}", font_color,
+            draw.text((1220, 160 + index * 330), f"+{i['level']}", font_color,
                       font=retic_title_font, anchor="mm")
 
             # スコア
@@ -143,7 +143,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             draw.text((1440, 95 + index * 330), f"{get_relic_score_text(relic_score)}", font_color,
                       font=title_font, anchor="mm")
 
-            img.paste(star_img, (1070, 145 + index * 330), star_img)
+            img.paste(star_img, (1075, 140 + index * 330), star_img)
             for sub_index, sub_i in enumerate(i["sub_affix"]):
                 draw.text((1110, 180 + index * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
                           font=retic_title_font)
@@ -153,7 +153,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                           "#808080", font=retic_formula_font, anchor='ra')
         else:
             draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
-                                   outline=font_color, width=2)
+                                   outline=font_color, width=1)
             img.paste(icon, (1510, 60 + (index - 3) * 330), icon)
 
             if len(i['main_affix']['name']) >= 8:
@@ -163,9 +163,9 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                 draw.text((1620, 70 + (index - 3) * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}",
                           font_color, font=retic_main_affix_title_font)
 
-            draw.rounded_rectangle((1587, 145 + (index - 3) * 330, 1635, 173 + (index - 3) * 330), radius=2, fill=None,
+            draw.rounded_rectangle((1595, 145 + (index - 3) * 330, 1645, 173 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
-            draw.text((1610, 160 + (index - 3) * 330), f"+{i['level']}", font_color,
+            draw.text((1620, 160 + (index - 3) * 330), f"+{i['level']}", font_color,
                       font=retic_title_font, anchor="mm")
 
             # スコア
@@ -174,7 +174,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             draw.text((1840, 95 + (index - 3) * 330), f"{get_relic_score_text(relic_score)}", font_color,
                       font=title_font, anchor="mm")
 
-            img.paste(star_img, (1470, 145 + (index - 3) * 330), star_img)
+            img.paste(star_img, (1475, 145 + (index - 3) * 330), star_img)
             for sub_index, sub_i in enumerate(i["sub_affix"]):
                 draw.text((1510, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
                           font=retic_title_font)
@@ -185,18 +185,18 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
 
     #relic合計スコア
     draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
-                               outline=font_color, width=2)
+                               outline=font_color, width=1)
     draw.text((80, 870), f"スコア: {round(relic_full_score, 1)}", font_color,
                   font=card_font)
     draw.text((380, 920), f"{get_relic_full_score_text(relic_full_score)}", font_color,
                   font=title_font, anchor="mm")
-    draw.text((80, 930), f"独自基準", font_color,
+    draw.text((80, 930), f"相性基準", font_color,
                   font=card_font)
 
     # カード
     if helta_json.get("light_cone"):
         draw.rounded_rectangle((490, 840, 1060, 1000), radius=2, fill=None,
-                               outline=font_color, width=2)
+                               outline=font_color, width=1)
         card_img = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['light_cone']['icon']}")).resize(
             (160, 150))
