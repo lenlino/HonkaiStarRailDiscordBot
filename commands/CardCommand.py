@@ -5,7 +5,8 @@ from discord.ext import commands
 from discord.ui import Select, Button, Modal, View
 
 import utils.DataBase
-from generate.generate import generate_panel, get_json_from_url
+from generate.generate import generate_panel
+from generate.utils import get_json_from_url
 
 
 class CardCommand(commands.Cog):
@@ -27,7 +28,9 @@ class CardCommand(commands.Cog):
         pass
 
     @discord.slash_command(name="card", description="カードを生成します", guilds=["864441028866080768"])
-    async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
+    async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID"),
+                           template: discord.Option(required=False, input_type=int, description="Template", default=1, choices=[1, 2]),
+                           hideuid: discord.Option(required=False, input_type=bool, description="HideUID", default=False, choices=[True, False])):
         await ctx.defer()
         selecter = Select()
         generate_button = Button()
@@ -55,7 +58,7 @@ class CardCommand(commands.Cog):
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
                 await ctx.edit(view=View(selecter, generate_button, uid_change_button, timeout=600))
                 nonlocal select_number
-                panel_img = await generate_panel(uid=uid, chara_id=int(select_number))
+                panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=int(template), is_hideUID=hideuid)
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
@@ -103,7 +106,7 @@ class CardCommand(commands.Cog):
         uid_change_button.callback = uid_change_button_callback
         uid_change_button.row = 4
         embed = discord.Embed(
-            title="HSR パネル生成",
+            title="Card Generate",
             color=discord.Colour.dark_blue(),
             description="読み込み中...",
         )
