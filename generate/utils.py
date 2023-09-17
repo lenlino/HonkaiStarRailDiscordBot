@@ -115,3 +115,17 @@ def get_relic_score_text(score):
         return "S"
     elif 100 <= score:
         return "SS"
+
+def get_relic_full_score_text(score):
+    if score < 120:
+        return "D"
+    elif 120 <= score < 240:
+        return "C"
+    elif 240 <= score < 360:
+        return "B"
+    elif 360 <= score < 480:
+        return "A"
+    elif 480 <= score < 600:
+        return "S"
+    elif 600 <= score:
+        return "SS"

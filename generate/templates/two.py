@@ -8,7 +8,7 @@ import aiohttp
 from PIL import ImageDraw, Image, ImageFont
 
 from generate.utils import get_json_from_url, get_json_from_json, get_image_from_url, get_relic_score_text, \
-    get_star_image_path_from_int, convert_old_roman_from_int, get_relic_score, get_file_path
+    get_star_image_path_from_int, convert_old_roman_from_int, get_relic_score, get_file_path, get_relic_full_score_text
 
 font_file_path = f"{get_file_path()}/assets/zh-cn.ttf"
 
@@ -112,7 +112,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
     draw.text((1035, 105), f"{helta_json['promotion']}", font_color, font=normal_font, anchor="mm")
     draw.rounded_rectangle((1020, 82, 1050, 127), radius=2, fill=None,
                            outline=font_color, width=2)
-
+    relic_full_score = 0
     # 遺物
     for index, i in enumerate(helta_json["relics"]):
         icon = Image.open(await get_image_from_url(
@@ -123,6 +123,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             (153, 36))
         relic_score_json = await get_relic_score(helta_json["id"], i)
         relic_score = round(relic_score_json["score"] * 100, 1)
+        relic_full_score += relic_score
         if index < 3:
             draw.rounded_rectangle((1100, 50 + index * 330, 1490, 365 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
@@ -182,9 +183,19 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                 draw.text((1880, 160 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
 
+    #relic合計スコア
+    draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
+                               outline=font_color, width=2)
+    draw.text((80, 870), f"スコア: {round(relic_full_score, 1)}", font_color,
+                  font=card_font)
+    draw.text((380, 920), f"{get_relic_full_score_text(relic_full_score)}", font_color,
+                  font=title_font, anchor="mm")
+    draw.text((80, 930), f"独自基準", font_color,
+                  font=card_font)
+
     # カード
     if helta_json.get("light_cone"):
-        draw.rounded_rectangle((50, 840, 1050, 1000), radius=2, fill=None,
+        draw.rounded_rectangle((490, 840, 1060, 1000), radius=2, fill=None,
                                outline=font_color, width=2)
         card_img = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['light_cone']['icon']}")).resize(
@@ -192,15 +203,17 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         card_star_img = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(int(helta_json['light_cone']['rarity']))}")).resize(
             (214, 48))
-        img.paste(card_img, (60, 840), card_img)
-        draw.text((610, 870), f"{helta_json['light_cone']['name']}", font_color,
-                  font=card_font, anchor='ra')
-        draw.line(((220, 860), (220, 980)), fill=font_color, width=1)
-        img.paste(card_star_img, (610, 860), card_star_img)
-        draw.text((610, 930), f"Lv.{helta_json['light_cone']['level']}", font_color,
-                  font=card_font, anchor='ra')
-        draw.text((660, 930), f"{convert_old_roman_from_int(int(helta_json['light_cone']['promotion']))}", font_color,
-                  font=card_font, anchor='ra')
+        img.paste(card_img, (500, 840), card_img)
+        if len(helta_json['light_cone']['name']) > 9:
+            helta_json['light_cone']['name'] = f"{helta_json['light_cone']['name'][:8]}..."
+        draw.text((700, 870), f"{helta_json['light_cone']['name']}", font_color,
+                  font=card_font)
+        draw.line(((680, 860), (680, 980)), fill=font_color, width=1)
+        img.paste(card_star_img, (460, 950), card_star_img)
+        draw.text((705, 930), f"Lv.{helta_json['light_cone']['level']}", font_color,
+                  font=card_font)
+        draw.text((830, 930), f"{convert_old_roman_from_int(int(helta_json['light_cone']['promotion']))}", font_color,
+                  font=card_font)
 
     # UID
     if is_hideUID is not True:
