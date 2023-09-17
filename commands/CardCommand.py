@@ -28,14 +28,17 @@ class CardCommand(commands.Cog):
         pass
 
     @discord.slash_command(name="card", description="カードを生成します", guilds=["864441028866080768"])
-    async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID"),
-                           template: discord.Option(required=False, input_type=int, description="Template", default=1, choices=[1, 2]),
-                           hideuid: discord.Option(required=False, input_type=bool, description="HideUID", default=False, choices=[True, False])):
+    async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
         await ctx.defer()
         selecter = Select()
+        calculation_selecter = Select()
         generate_button = Button()
         uid_change_button = Button()
         select_number = 0
+        calculation_value = 0
+
+        def get_view():
+            return View(selecter, calculation_selecter, generate_button, uid_change_button, timeout=600)
 
         async def selector_callback(interaction):
             try:
@@ -45,6 +48,13 @@ class CardCommand(commands.Cog):
             except discord.errors.HTTPException:
                 pass
 
+        async def calculation_selector_callback(interaction):
+            try:
+                nonlocal calculation_value
+                calculation_value = selecter.values[0]
+                await interaction.response.send_message("")
+            except discord.errors.HTTPException:
+                pass
 
         async def button_callback(interaction):
             await interaction.response.defer()
@@ -56,9 +66,10 @@ class CardCommand(commands.Cog):
                 generate_button.disabled = True
                 print(uid)
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
-                await ctx.edit(view=View(selecter, generate_button, uid_change_button, timeout=600))
+                await ctx.edit(view=get_view())
                 nonlocal select_number
-                panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=int(template), is_hideUID=hideuid)
+                panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=2, is_hideUID=False
+                                                 , calculating_standard=calculation_value)
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
@@ -89,7 +100,7 @@ class CardCommand(commands.Cog):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
-                await ctx.edit(view=View(selecter, generate_button, uid_change_button, timeout=600))
+                await ctx.edit(view=get_view())
             else:
                 embed.description = "UIDが指定されていない、または存在しないUIDです。"
 
@@ -97,7 +108,7 @@ class CardCommand(commands.Cog):
 
         selecter.callback = selector_callback
         selecter.options = [discord.SelectOption(label="UID未設定", default=True)]
-        selecter.custom_id = "check_id"
+        selecter.row = 0
         generate_button.label = "パネル生成"
         generate_button.callback = button_callback
         generate_button.row = 4
@@ -105,18 +116,22 @@ class CardCommand(commands.Cog):
         uid_change_button.label = "UID変更"
         uid_change_button.callback = uid_change_button_callback
         uid_change_button.row = 4
+        calculation_selecter.callback = calculation_selector_callback
+        calculation_selecter.options = [discord.SelectOption(label="相性基準", default=True, value="compatibility")]
+        calculation_selecter.row = 1
+
         embed = discord.Embed(
-            title="Card Generate",
+            title="Herta Card System",
             color=discord.Colour.dark_blue(),
             description="読み込み中...",
         )
 
-        await ctx.send_followup(embed=embed, view=View(selecter, generate_button, uid_change_button, timeout=600))
+        await ctx.send_followup(embed=embed, view=get_view())
         if uid is None:
             uid = await utils.DataBase.getdatabase(ctx.user.id, "uid")
         await set_uid(uid)
         return
 
 
-def setup(bot): # this is called by Pycord to setup the cog
-    bot.add_cog(CardCommand(bot)) # add the cog to the bot
+def setup(bot):  # this is called by Pycord to setup the cog
+    bot.add_cog(CardCommand(bot))  # add the cog to the bot
