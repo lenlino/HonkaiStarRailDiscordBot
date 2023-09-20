@@ -7,6 +7,8 @@ import discord.ext.commands.cog
 from discord.ext import tasks
 from dotenv import load_dotenv
 
+import backend.backend
+
 load_dotenv()
 
 import utils.DataBase
