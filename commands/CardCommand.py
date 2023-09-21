@@ -121,6 +121,8 @@ class CardCommand(commands.Cog):
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
                 await ctx.edit(view=get_view())
+            elif info["detail"] == "Queue timeout":
+                embed.description = "APIサーバーが停止しています。復旧までお待ち下さい。(Queue timeout)"
             else:
                 embed.description = "UIDが指定されていない、または存在しないUIDです。"
 
