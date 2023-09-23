@@ -8,6 +8,10 @@ from discord.ext import tasks
 from dotenv import load_dotenv
 
 import backend.backend
+import i18n
+
+i18n.load_path.append(f"{os.path.dirname(os.path.abspath(__file__))}/i18n")
+i18n.set('fallback', 'en')
 
 load_dotenv()
 

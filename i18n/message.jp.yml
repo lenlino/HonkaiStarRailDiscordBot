@@ -1,0 +1,3 @@
+jp:
+  hello: こんにちは
+  heelo_name: "こんにちは %{name}"

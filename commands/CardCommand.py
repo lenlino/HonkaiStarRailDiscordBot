@@ -1,12 +1,13 @@
 import io
 
 import discord
+import i18n
 from discord.ext import commands
 from discord.ui import Select, Button, Modal, View
 
 import utils.DataBase
 from generate.generate import generate_panel
-from generate.utils import get_json_from_url
+from generate.utils import get_json_from_url, get_mihomo_lang
 
 
 class CardCommand(commands.Cog):
@@ -27,7 +28,7 @@ class CardCommand(commands.Cog):
     class Modal(discord.ui.Modal):
         pass
 
-    @discord.slash_command(name="card", description="カードを生成します", guilds=["864441028866080768"])
+    @discord.slash_command(name="card", description="Generate build card", guilds=["864441028866080768"])
     async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
         await ctx.defer()
         selecter = Select()
@@ -38,6 +39,8 @@ class CardCommand(commands.Cog):
         select_number = 0
         calculation_value = 0
         is_uid_hide = False
+        lang = get_mihomo_lang(ctx.interaction.locale)
+        print(ctx.interaction.locale)
 
         def get_view():
             return View(selecter, calculation_selecter, generate_button, uid_change_button, uid_hide_button, timeout=600)
@@ -45,10 +48,10 @@ class CardCommand(commands.Cog):
         def update_uid_hide_button():
             if is_uid_hide:
                 uid_hide_button.style = discord.ButtonStyle.green
-                uid_hide_button.label = "UID非表示:  ON"
+                uid_hide_button.label = f"{i18n.t('message.hide_uid', locale=lang)+i18n.t('message.on', locale=lang)}"
             else:
                 uid_hide_button.style = discord.ButtonStyle.gray
-                uid_hide_button.label = "UID非表示: OFF"
+                uid_hide_button.label = f"{i18n.t('message.hide_uid', locale=lang)+i18n.t('message.off', locale=lang)}"
 
         async def selector_callback(interaction):
             try:
@@ -89,11 +92,11 @@ class CardCommand(commands.Cog):
                 await ctx.edit(view=get_view())
                 nonlocal select_number
                 panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=2, is_hideUID=is_uid_hide
-                                                 , calculating_standard=calculation_value)
+                                                 , calculating_standard=calculation_value, lang=lang)
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
-                generate_button.label = "パネル生成"
+                generate_button.label = i18n.t('message.hello', local=lang)
                 generate_button.disabled = False
                 await set_uid(uid)
 

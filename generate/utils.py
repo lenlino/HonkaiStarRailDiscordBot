@@ -33,6 +33,7 @@ def get_json_from_json(json_list, key, value):
             return i
     return {}
 
+
 def get_file_path():
     return os.path.dirname(os.path.abspath(__file__))
 
@@ -68,10 +69,11 @@ async def get_relic_score(chara_id, relic_json):
     result_json = {}
 
     # メインの計算
-    main_weight = weight_json[chara_id]["main"][relic_id_json.get(relic_json["id"], relic_json["id"])[-1]][relic_json["main_affix"]["type"]]
+    main_weight = weight_json[chara_id]["main"][relic_id_json.get(relic_json["id"], relic_json["id"])[-1]][
+        relic_json["main_affix"]["type"]]
     main_affix_score = (relic_json["level"] + 1) / 16 * main_weight
-    result_json["main_formula"] = f'{round((relic_json["level"] + 1) / 16*100, 1)}×{main_weight}={main_affix_score*100}'
-
+    result_json[
+        "main_formula"] = f'{round((relic_json["level"] + 1) / 16 * 100, 1)}×{main_weight}={main_affix_score * 100}'
 
     # サブの計算
     sub_affix_score = 0
@@ -80,7 +82,8 @@ async def get_relic_score(chara_id, relic_json):
         sub_affix_type = sub_affix_json["type"]
         score = sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
         sub_affix_score += score
-        sub_affix_formulas.append(f'{round(sub_affix_json["value"]/max_json[sub_affix_type]*100, 1)}×{round(weight_json[chara_id]["weight"][sub_affix_type],1)}')
+        sub_affix_formulas.append(
+            f'{round(sub_affix_json["value"] / max_json[sub_affix_type] * 100, 1)}×{round(weight_json[chara_id]["weight"][sub_affix_type], 1)}')
 
     result_json["score"] = main_affix_score * 0.5 + sub_affix_score * 0.5
     result_json["sub_formulas"] = sub_affix_formulas
@@ -116,6 +119,7 @@ def get_relic_score_text(score):
     elif 100 <= score:
         return "SS"
 
+
 def get_relic_full_score_text(score):
     if score < 120:
         return "D"
@@ -129,3 +133,32 @@ def get_relic_full_score_text(score):
         return "S"
     elif 600 <= score:
         return "SS"
+
+
+def get_mihomo_lang(discord_lang):
+    if discord_lang == "id":
+        return "id"
+    elif discord_lang == "fr":
+        return "fr"
+    elif discord_lang == "de":
+        return "de"
+    elif discord_lang == "es-ES":
+        return "es"
+    elif discord_lang == "ja":
+        return "jp"
+    elif discord_lang == "ko":
+        return "kr"
+    elif discord_lang == "pt-BR":
+        return "pt"
+    elif discord_lang == "ru":
+        return "ru"
+    elif discord_lang == "th":
+        return "th"
+    elif discord_lang == "vi":
+        return "vi"
+    elif discord_lang == "zh-TW":
+        return "cht"
+    elif discord_lang == "zh-CN":
+        return "cn"
+    else:
+        return "en"
