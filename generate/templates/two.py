@@ -6,6 +6,7 @@ import pathlib
 import textwrap
 
 import aiohttp
+import i18n
 from PIL import ImageDraw, Image, ImageFont
 
 from generate.utils import get_json_from_url, get_json_from_json, get_image_from_url, get_relic_score_text, \
@@ -18,7 +19,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
     font_color = "#f0eaca"
     touka_color = "#191919"
     json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
-    if lang == "jp":
+    if lang == "jp" or lang == "cn" or lang == "cht":
         light_cone_name_limit = 9
         chara_name_limit = 5
         relic_main_affix_name_limit = 7
@@ -194,11 +195,11 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
     #relic合計スコア
     draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
                                outline=font_color, width=1)
-    draw.text((80, 870), f"スコア: {round(relic_full_score, 1)}", font_color,
+    draw.text((80, 870), f"{i18n.t('message.score', locale=lang)}{round(relic_full_score, 1)}", font_color,
                   font=card_font)
     draw.text((380, 920), f"{get_relic_full_score_text(relic_full_score)}", font_color,
                   font=title_font, anchor="mm")
-    draw.text((80, 930), f"相性基準", font_color,
+    draw.text((80, 930), i18n.t('message.compatibility_criteria', locale=lang), font_color,
                   font=card_font)
 
     # カード
