@@ -3,8 +3,10 @@ import json
 import math
 import os
 import pathlib
+import textwrap
 
 import aiohttp
+import i18n
 from PIL import ImageDraw, Image, ImageFont
 
 from generate.utils import get_json_from_url, get_json_from_json, get_image_from_url, get_relic_score_text, \
@@ -13,10 +15,18 @@ from generate.utils import get_json_from_url, get_json_from_json, get_image_from
 font_file_path = f"{get_file_path()}/assets/zh-cn.ttf"
 
 
-async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculating_standard="compatibility"):
+async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculating_standard="compatibility", lang="jp"):
     font_color = "#f0eaca"
     touka_color = "#191919"
-    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
+    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
+    if lang == "jp" or lang == "cn" or lang == "cht":
+        light_cone_name_limit = 9
+        chara_name_limit = 5
+        relic_main_affix_name_limit = 7
+    else:
+        light_cone_name_limit = 18
+        chara_name_limit = 18
+        relic_main_affix_name_limit = 12
     helta_json = json["characters"][int(chara_id)]
     img = Image.open(f"{get_file_path()}/assets/bkg.png").convert(
         'RGBA')
@@ -52,6 +62,12 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(int(helta_json['rarity']))}")).resize(
         (306, 72))
     img.paste(star_img, (210, 50), star_img)
+    draw.text((315, 105), f"Lv.{helta_json['level']}", font_color,
+              font=normal_font)
+    icon = Image.open(await get_image_from_url(
+        f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['element']['icon']}")).resize(
+        (40, 40))
+    img.paste(icon, (400, 100), icon)
 
     # キャラステータス
     for index, i in enumerate(helta_json["attributes"]):
@@ -97,13 +113,9 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             show_count += 1
 
     # キャラタイトル
-    draw.text((500, 50), helta_json['name'], "#f0eaca", spacing=10, align='left', font=title_font)
-    icon = Image.open(await get_image_from_url(
-        f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['element']['icon']}")).resize(
-        (55, 55))
-    img.paste(icon, (500 + (len(helta_json['name'])) * 60, 70), icon)
-    draw.text((500 + (len(helta_json['name'])) * 60 + 55, 90), f"Lv.{helta_json['level']}", font_color,
-              font=normal_font)
+    draw.multiline_text((500, 140), '\n'.join(textwrap.wrap(helta_json['name'], chara_name_limit)), "#f0eaca", anchor="ld", font=title_font)
+
+
     draw.line(((490, 135), (1060, 135)), fill=font_color, width=3)
     path_icon = Image.open(await get_image_from_url(
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['path']['icon']}")).resize(
@@ -124,13 +136,14 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         relic_score_json = await get_relic_score(helta_json["id"], i)
         relic_score = round(relic_score_json["score"] * 100, 1)
         relic_full_score += relic_score
+        relic_main_affix_name = '\n'.join(textwrap.wrap(i['main_affix']['name'], relic_main_affix_name_limit))
         if index < 3:
             draw.rounded_rectangle((1100, 50 + index * 330, 1490, 365 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=1)
             img.paste(icon, (1110, 60 + index * 330), icon)
 
-            draw.text((1220, 70 + index * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}", font_color,
-                      font=retic_main_affix_title_font)
+            draw.text((1220, 100 + index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}", font_color,
+                      font=retic_main_affix_title_font, anchor="lm")
 
             draw.rounded_rectangle((1195, 145 + index * 330, 1245, 173 + index * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
@@ -149,19 +162,15 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                           font=retic_title_font)
                 draw.text((1480, 180 + index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
-                draw.text((1480, 160 + index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                draw.text((1480, 165 + index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
         else:
             draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=1)
             img.paste(icon, (1510, 60 + (index - 3) * 330), icon)
 
-            if len(i['main_affix']['name']) >= 8:
-                draw.text((1610, 70 + (index - 3) * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}",
-                          font_color, font=retic_main_affix_title_small_font)
-            else:
-                draw.text((1620, 70 + (index - 3) * 330), f"{i['main_affix']['name']}\n{i['main_affix']['display']}",
-                          font_color, font=retic_main_affix_title_font)
+            draw.text((1610, 100 + (index - 3) * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}",
+                      font_color, font=retic_main_affix_title_small_font, anchor="lm")
 
             draw.rounded_rectangle((1595, 145 + (index - 3) * 330, 1645, 173 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
@@ -180,17 +189,17 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                           font=retic_title_font)
                 draw.text((1880, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
-                draw.text((1880, 160 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                draw.text((1880, 165 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
 
     #relic合計スコア
     draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
                                outline=font_color, width=1)
-    draw.text((80, 870), f"スコア: {round(relic_full_score, 1)}", font_color,
+    draw.text((80, 870), f"{i18n.t('message.score', locale=lang)}{round(relic_full_score, 1)}", font_color,
                   font=card_font)
     draw.text((380, 920), f"{get_relic_full_score_text(relic_full_score)}", font_color,
                   font=title_font, anchor="mm")
-    draw.text((80, 930), f"相性基準", font_color,
+    draw.text((80, 930), i18n.t('message.compatibility_criteria', locale=lang), font_color,
                   font=card_font)
 
     # カード
@@ -204,10 +213,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(int(helta_json['light_cone']['rarity']))}")).resize(
             (214, 48))
         img.paste(card_img, (500, 840), card_img)
-        if len(helta_json['light_cone']['name']) > 9:
-            helta_json['light_cone']['name'] = f"{helta_json['light_cone']['name'][:8]}..."
-        draw.text((700, 870), f"{helta_json['light_cone']['name']}", font_color,
-                  font=card_font)
+        draw.multiline_text((700, 890), '\n'.join(textwrap.wrap(helta_json['light_cone']['name'], light_cone_name_limit)), font_color,
+                  font=card_font, anchor="lm")
         draw.line(((680, 860), (680, 980)), fill=font_color, width=1)
         img.paste(card_star_img, (460, 950), card_star_img)
         draw.text((705, 930), f"Lv.{helta_json['light_cone']['level']}", font_color,

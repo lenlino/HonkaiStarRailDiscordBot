@@ -1,12 +1,13 @@
 import io
 
 import discord
+import i18n
 from discord.ext import commands
 from discord.ui import Select, Button, Modal, View
 
 import utils.DataBase
 from generate.generate import generate_panel
-from generate.utils import get_json_from_url
+from generate.utils import get_json_from_url, get_mihomo_lang
 
 
 class CardCommand(commands.Cog):
@@ -27,7 +28,7 @@ class CardCommand(commands.Cog):
     class Modal(discord.ui.Modal):
         pass
 
-    @discord.slash_command(name="card", description="カードを生成します", guilds=["864441028866080768"])
+    @discord.slash_command(name="card", description="Generate build card", guilds=["864441028866080768"])
     async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
         await ctx.defer()
         selecter = Select()
@@ -38,6 +39,8 @@ class CardCommand(commands.Cog):
         select_number = 0
         calculation_value = 0
         is_uid_hide = False
+        lang = get_mihomo_lang(ctx.interaction.locale)
+        print(ctx.interaction.locale)
 
         def get_view():
             return View(selecter, calculation_selecter, generate_button, uid_change_button, uid_hide_button, timeout=600)
@@ -45,10 +48,10 @@ class CardCommand(commands.Cog):
         def update_uid_hide_button():
             if is_uid_hide:
                 uid_hide_button.style = discord.ButtonStyle.green
-                uid_hide_button.label = "UID非表示:  ON"
+                uid_hide_button.label = f"{i18n.t('message.hide_uid', locale=lang)+i18n.t('message.on', locale=lang)}"
             else:
                 uid_hide_button.style = discord.ButtonStyle.gray
-                uid_hide_button.label = "UID非表示: OFF"
+                uid_hide_button.label = f"{i18n.t('message.hide_uid', locale=lang)+i18n.t('message.off', locale=lang)}"
 
         async def selector_callback(interaction):
             try:
@@ -78,27 +81,27 @@ class CardCommand(commands.Cog):
 
         async def button_callback(interaction):
             await interaction.response.defer()
-            if selecter.options[0].label == "UID未設定":
-                await interaction.followup.send("UIDが設定されていません。")
+            if selecter.options[0].label == i18n.t("message.uid_not_set", locale=lang):
+                await interaction.followup.send(i18n.t("message.error_uid_not_set", locale=lang))
                 return
             with io.BytesIO() as image_binary:
-                generate_button.label = "生成中..."
+                generate_button.label = i18n.t("message.generating", locale=lang)
                 generate_button.disabled = True
                 print(uid)
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
                 await ctx.edit(view=get_view())
                 nonlocal select_number
                 panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=2, is_hideUID=is_uid_hide
-                                                 , calculating_standard=calculation_value)
+                                                 , calculating_standard=calculation_value, lang=lang)
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
-                generate_button.label = "パネル生成"
+                generate_button.label = i18n.t('message.generate', local=lang)
                 generate_button.disabled = False
                 await set_uid(uid)
 
         async def uid_change_button_callback(interaction):
-            modal = Modal(title="UID変更")
+            modal = Modal(title=i18n.t("message.change_uid", locale=lang))
             modal.add_item(discord.ui.InputText(label="UID"))
 
             async def uid_change_modal_callback(modal_interaction):
@@ -111,43 +114,45 @@ class CardCommand(commands.Cog):
         async def set_uid(changed_uid):
             info = await get_json_from_url(f"https://api.mihomo.me/sr_info/{changed_uid}")
             if "detail" not in info:
-                embed.description = f"ニックネーム: {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
+                embed.description = f"{i18n.t('message.nickname', locale=lang)} {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
                 nonlocal uid
                 uid = info['detailInfo']['uid']
-                json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
+                json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
                 selecter.options = []
                 for index, i in enumerate(json["characters"]):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
                 await ctx.edit(view=get_view())
+            elif info["detail"] == "Queue timeout":
+                embed.description = i18n.t("message.error_queue_timeout", locale=lang)
             else:
-                embed.description = "UIDが指定されていない、または存在しないUIDです。"
+                embed.description = i18n.t("message.error_not_exist_uid", locale=lang)
 
             await ctx.edit(embed=embed)
 
         selecter.callback = selector_callback
-        selecter.options = [discord.SelectOption(label="UID未設定", default=True)]
+        selecter.options = [discord.SelectOption(label=i18n.t("message.uid_not_set", locale=lang), default=True)]
         selecter.row = 0
-        generate_button.label = "パネル生成"
+        generate_button.label = i18n.t("message.generate", locale=lang)
         generate_button.callback = button_callback
         generate_button.row = 4
         generate_button.style = discord.ButtonStyle.primary
-        uid_change_button.label = "UID変更"
+        uid_change_button.label = i18n.t("message.change_uid", locale=lang)
         uid_change_button.callback = uid_change_button_callback
         uid_change_button.row = 4
         calculation_selecter.callback = calculation_selector_callback
-        calculation_selecter.options = [discord.SelectOption(label="相性基準", default=True, value="compatibility")]
+        calculation_selecter.options = [discord.SelectOption(label=i18n.t("message.compatibility_criteria", locale=lang), default=True, value="compatibility")]
         calculation_selecter.row = 1
         uid_hide_button.row = 4
         uid_hide_button.callback = uid_hide_button_callback
         uid_hide_button.style = discord.ButtonStyle.gray
-        uid_hide_button.label = "UID非表示: OFF"
+        uid_hide_button.label = i18n.t('message.hide_uid', locale=lang)+i18n.t('message.off', locale=lang)
 
         embed = discord.Embed(
             title="Herta Card System",
             color=discord.Colour.dark_blue(),
-            description="読み込み中...",
+            description=i18n.t("message.loading", locale=lang),
         )
 
         await ctx.send_followup(embed=embed, view=get_view())
