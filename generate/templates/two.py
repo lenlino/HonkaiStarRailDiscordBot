@@ -121,7 +121,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{helta_json['path']['icon']}")).resize(
         (50, 50))
     img.paste(path_icon, (960, 80), path_icon)
-    draw.text((1035, 105), f"{helta_json['promotion']}", font_color, font=normal_font, anchor="mm")
+    draw.text((1035, 105), f"{helta_json['rank']}", font_color, font=normal_font, anchor="mm")
     draw.rounded_rectangle((1020, 82, 1050, 127), radius=2, fill=None,
                            outline=font_color, width=2)
     relic_full_score = 0
