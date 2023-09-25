@@ -219,7 +219,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         img.paste(card_star_img, (460, 950), card_star_img)
         draw.text((705, 930), f"Lv.{helta_json['light_cone']['level']}", font_color,
                   font=card_font)
-        draw.text((830, 930), f"{convert_old_roman_from_int(int(helta_json['light_cone']['promotion']))}", font_color,
+        draw.text((830, 930), f"{convert_old_roman_from_int(int(helta_json['light_cone']['rank']))}", font_color,
                   font=card_font)
 
     # UID

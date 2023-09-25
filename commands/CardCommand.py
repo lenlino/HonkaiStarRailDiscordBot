@@ -11,22 +11,6 @@ from generate.utils import get_json_from_url, get_mihomo_lang
 
 
 class CardCommand(commands.Cog):
-    class View(discord.ui.View):
-        def __init__(self):
-            super().__init__(timeout=600)  # timeout of the view must be set to None
-
-        async def on_timeout(self):
-            self.disable_all_items()
-            await self.message.edit(content="You took too long! Disabled all the components.", view=self)
-
-    class Select(discord.ui.Select):
-        pass
-
-    class Button(discord.ui.Button):
-        pass
-
-    class Modal(discord.ui.Modal):
-        pass
 
     @discord.slash_command(name="card", description="Generate build card", guilds=["864441028866080768"])
     async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
@@ -96,7 +80,7 @@ class CardCommand(commands.Cog):
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 await interaction.followup.send(file=discord.File(image_binary, "panel.png"))
-                generate_button.label = i18n.t('message.generate', local=lang)
+                generate_button.label = i18n.t('message.generate', locale=lang)
                 generate_button.disabled = False
                 await set_uid(uid)
 
