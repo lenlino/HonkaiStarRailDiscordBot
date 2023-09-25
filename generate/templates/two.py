@@ -98,6 +98,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                       font=normal_font, anchor='ra')
     show_count = 0
     for index, i in enumerate(helta_json["properties"]):
+        if i["field"] == "sp_rate":
+            i["display"] = str(round((i["value"] + 1) * 100, 1))+"%"
         if i["field"] != "def" and i["field"] != "crit_rate" and i["field"] != "atk" and i["field"] != "hp" and i[
             "field"] != "crit_dmg" and i["field"] != "spd":
             icon = Image.open(await get_image_from_url(
