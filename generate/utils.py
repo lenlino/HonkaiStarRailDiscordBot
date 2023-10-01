@@ -116,8 +116,10 @@ def get_relic_score_text(score):
         return "A"
     elif 80 <= score < 100:
         return "S"
-    elif 100 <= score:
+    elif 100 <= score < 120:
         return "SS"
+    elif 120 <= score:
+        return "OP"
 
 
 def get_relic_full_score_text(score):
@@ -131,8 +133,10 @@ def get_relic_full_score_text(score):
         return "A"
     elif 480 <= score < 600:
         return "S"
-    elif 600 <= score:
+    elif 600 <= score < 720:
         return "SS"
+    elif 720 <= score:
+        return "OP"
 
 
 def get_mihomo_lang(discord_lang):
