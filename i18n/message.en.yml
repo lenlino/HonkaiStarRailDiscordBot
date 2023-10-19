@@ -11,5 +11,6 @@ en:
   nickname: "Nickname: "
   generate: "Generate"
   compatibility_criteria: "Compatibility"
+  no_score: "No score"
   loading: "Loading..."
   score: "Score: "
