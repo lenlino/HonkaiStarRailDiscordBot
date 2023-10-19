@@ -48,7 +48,7 @@ class CardCommand(commands.Cog):
         async def calculation_selector_callback(interaction):
             try:
                 nonlocal calculation_value
-                calculation_value = selecter.values[0]
+                calculation_value = calculation_selecter.values[0]
                 await interaction.response.send_message("")
             except discord.errors.HTTPException:
                 pass
@@ -126,7 +126,8 @@ class CardCommand(commands.Cog):
         uid_change_button.callback = uid_change_button_callback
         uid_change_button.row = 4
         calculation_selecter.callback = calculation_selector_callback
-        calculation_selecter.options = [discord.SelectOption(label=i18n.t("message.compatibility_criteria", locale=lang), default=True, value="compatibility")]
+        calculation_selecter.options = [discord.SelectOption(label=i18n.t("message.compatibility_criteria", locale=lang), default=True, value="compatibility"),
+                                        discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=False, value="no_score")]
         calculation_selecter.row = 1
         uid_hide_button.row = 4
         uid_hide_button.callback = uid_hide_button_callback

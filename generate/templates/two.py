@@ -153,9 +153,10 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                       font=retic_title_font, anchor="mm")
 
             # スコア
-            draw.text((1440, 135 + index * 330), f"{relic_score}", font_color,
+            if calculating_standard != "no_score":
+                draw.text((1440, 135 + index * 330), f"{relic_score}", font_color,
                       font=retic_title_font, anchor="mm")
-            draw.text((1440, 95 + index * 330), f"{get_relic_score_text(relic_score)}", font_color,
+                draw.text((1440, 95 + index * 330), f"{get_relic_score_text(relic_score)}", font_color,
                       font=title_font, anchor="mm")
 
             img.paste(star_img, (1075, 140 + index * 330), star_img)
@@ -164,7 +165,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                           font=retic_title_font)
                 draw.text((1480, 180 + index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
-                draw.text((1480, 165 + index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                if calculating_standard != "no_score":
+                    draw.text((1480, 165 + index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
         else:
             draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
@@ -180,9 +182,10 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                       font=retic_title_font, anchor="mm")
 
             # スコア
-            draw.text((1840, 135 + (index - 3) * 330), f"{relic_score}", font_color,
+            if calculating_standard != "no_score":
+                draw.text((1840, 135 + (index - 3) * 330), f"{relic_score}", font_color,
                       font=retic_title_font, anchor="mm")
-            draw.text((1840, 95 + (index - 3) * 330), f"{get_relic_score_text(relic_score)}", font_color,
+                draw.text((1840, 95 + (index - 3) * 330), f"{get_relic_score_text(relic_score)}", font_color,
                       font=title_font, anchor="mm")
 
             img.paste(star_img, (1475, 145 + (index - 3) * 330), star_img)
@@ -191,18 +194,25 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                           font=retic_title_font)
                 draw.text((1880, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
-                draw.text((1880, 165 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                if calculating_standard != "no_score":
+                    draw.text((1880, 165 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
 
-    #relic合計スコア
+    #relic合計スコアor遺物組み合わせ
     draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
-                               outline=font_color, width=1)
-    draw.text((80, 870), f"{i18n.t('message.score', locale=lang)}{round(relic_full_score, 1)}", font_color,
+                           outline=font_color, width=1)
+    if calculating_standard != "no_score":
+        draw.text((80, 870), f"{i18n.t('message.score', locale=lang)}{round(relic_full_score, 1)}", font_color,
                   font=card_font)
-    draw.text((380, 920), f"{get_relic_full_score_text(relic_full_score)}", font_color,
+        draw.text((380, 920), f"{get_relic_full_score_text(relic_full_score)}", font_color,
                   font=title_font, anchor="mm")
-    draw.text((80, 930), i18n.t('message.compatibility_criteria', locale=lang), font_color,
+        draw.text((80, 930), i18n.t('message.compatibility_criteria', locale=lang), font_color,
                   font=card_font)
+    else:
+        for sets_index, sets in enumerate(helta_json["relic_sets"]):
+            draw.text((80, 865+sets_index*40), f"{sets['num']} - {sets['name']}", font_color,
+                  font=retic_main_affix_title_font)
+
 
     # カード
     if helta_json.get("light_cone"):
