@@ -242,6 +242,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
     used_ultra = False
     used_normal = False
     for index, i in enumerate(helta_json["skills"]):
+        if skill_index >= 5:
+            break
         if i["max_level"] == 1 and i["type"] != "Maze":
             continue
         if i["type"] == "Ultra":
