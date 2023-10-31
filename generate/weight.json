@@ -1192,7 +1192,7 @@
                 "AttackAddedRatio": 0.8,
                 "DefenceAddedRatio": 0,
                 "CriticalChanceBase": 1,
-                "CriticalDamageBase": 0,
+                "CriticalDamageBase": 1,
                 "HealRatioBase": 0,
                 "StatusProbabilityBase": 0
             },
@@ -1200,7 +1200,7 @@
                 "HPAddedRatio": 0,
                 "AttackAddedRatio": 1,
                 "DefenceAddedRatio": 0,
-                "SpeedDelta": 0
+                "SpeedDelta": 1
             },
             "5": {
                 "HPAddedRatio": 0,
@@ -1224,14 +1224,14 @@
         },
         "weight": {
             "HPDelta": 0,
-            "AttackDelta": 0,
+            "AttackDelta": 0.8,
             "DefenceDelta": 0,
             "HPAddedRatio": 0,
-            "AttackAddedRatio": 0,
+            "AttackAddedRatio": 0.8,
             "DefenceAddedRatio": 0,
-            "SpeedDelta": 0,
-            "CriticalChanceBase": 0,
-            "CriticalDamageBase": 0,
+            "SpeedDelta": 1,
+            "CriticalChanceBase": 1,
+            "CriticalDamageBase": 1,
             "StatusProbabilityBase": 0,
             "StatusResistanceBase": 0,
             "BreakDamageAddedRatioBase": 0
@@ -1784,7 +1784,7 @@
                 "CriticalChanceBase": 0,
                 "CriticalDamageBase": 0,
                 "HealRatioBase": 0,
-                "StatusProbabilityBase": 0
+                "StatusProbabilityBase": 1
             },
             "4": {
                 "HPAddedRatio": 0,
@@ -1814,17 +1814,17 @@
         },
         "weight": {
             "HPDelta": 0,
-            "AttackDelta": 0,
+            "AttackDelta": 1,
             "DefenceDelta": 0,
             "HPAddedRatio": 0,
-            "AttackAddedRatio": 0,
+            "AttackAddedRatio": 1,
             "DefenceAddedRatio": 0,
-            "SpeedDelta": 0,
+            "SpeedDelta": 1,
             "CriticalChanceBase": 0,
             "CriticalDamageBase": 0,
-            "StatusProbabilityBase": 0,
+            "StatusProbabilityBase": 1,
             "StatusResistanceBase": 0,
-            "BreakDamageAddedRatioBase": 0
+            "BreakDamageAddedRatioBase": 0.8
         },
         "max": 0.0
     },
