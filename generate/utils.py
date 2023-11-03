@@ -80,7 +80,9 @@ async def get_relic_score(chara_id, relic_json):
     sub_affix_formulas = []
     for sub_affix_json in relic_json["sub_affix"]:
         sub_affix_type = sub_affix_json["type"]
-        score = sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
+        #print(f"{weight_json[chara_id]['weight'][sub_affix_type]}/{sub_affix_type}")
+        #print(f"{weight_json[chara_id]['weight']}")
+        score = (sub_affix_json["value"] / max_json[sub_affix_type]) * weight_json[chara_id]["weight"][sub_affix_type]
         sub_affix_score += score
         sub_affix_formulas.append(
             f'{round(sub_affix_json["value"] / max_json[sub_affix_type] * 100, 1)}×{round(weight_json[chara_id]["weight"][sub_affix_type], 1)}')
@@ -166,3 +168,9 @@ def get_mihomo_lang(discord_lang):
         return "cn"
     else:
         return "en"
+
+
+def get_weight(chara_id):
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
+        weight_json = json.load(f)
+    return weight_json[str(chara_id)]["weight"]
