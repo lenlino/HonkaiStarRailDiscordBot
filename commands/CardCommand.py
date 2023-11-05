@@ -27,6 +27,7 @@ class CardCommand(commands.Cog):
         is_uid_hide = False
         lang = get_mihomo_lang(ctx.interaction.locale)
         user_detail_dict = {}
+        json_parsed = {}
         print(ctx.interaction.locale)
 
         def get_view():
@@ -95,15 +96,9 @@ class CardCommand(commands.Cog):
 
                 # 重み
                 weight_text = ""
-                if select_number == 0 and "assistAvatarDetail" in user_detail_dict['detailInfo']:
-                    avatar_id = user_detail_dict['detailInfo']["assistAvatarDetail"]["avatarId"]
-                    weight_dict = generate.utils.get_weight(avatar_id)
-                elif "assistAvatarDetail" not in user_detail_dict['detailInfo']:
-                    avatar_id = user_detail_dict['detailInfo']["avatarDetailList"][select_number]["avatarId"]
-                    weight_dict = generate.utils.get_weight(avatar_id)
-                else:
-                    avatar_id = user_detail_dict['detailInfo']["avatarDetailList"][select_number-1]["avatarId"]
-                    weight_dict = generate.utils.get_weight(avatar_id)
+                avatar_id = json_parsed["characters"][select_number]['id']
+                weight_dict = generate.utils.get_weight(avatar_id)
+
                 for k, v in weight_dict.items():
                     if v == 0:
                         continue
@@ -142,11 +137,12 @@ class CardCommand(commands.Cog):
                 embed.description = f"{i18n.t('message.nickname', locale=lang)} {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
                 nonlocal uid
                 nonlocal user_detail_dict
+                nonlocal json_parsed
                 user_detail_dict = info
                 uid = info['detailInfo']['uid']
-                json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
+                json_parsed = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
                 selecter.options = []
-                for index, i in enumerate(json["characters"]):
+                for index, i in enumerate(json_parsed["characters"]):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
