@@ -26,3 +26,7 @@ en:
   StatusProbabilityBase: "StatusProbabilityBase"
   StatusResistanceBase: "StatusResistanceBase"
   BreakDamageAddedRatioBase: "BreakDamageAddedRatioBase"
+  Median: "Median"
+  Mean: "Mean"
+  Rank: "Rank"
+  high_score: "High Score"

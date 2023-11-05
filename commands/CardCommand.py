@@ -79,34 +79,45 @@ class CardCommand(commands.Cog):
                 await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
                 await ctx.edit(view=get_view())
                 nonlocal select_number
-                panel_img = await generate_panel(uid=uid, chara_id=int(select_number), template=2,
+                panel_img_result = await generate_panel(uid=uid, chara_id=int(select_number), template=2,
                                                  is_hideUID=is_uid_hide
                                                  , calculating_standard=calculation_value, lang=lang)
+                panel_img = panel_img_result['img']
+
                 panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 dt_now = datetime.datetime.now()
                 file = discord.File(image_binary, f"hertacardsys_{dt_now.strftime('%Y%m%d%H%M')}.png")
                 res_embed = discord.Embed(
-                    title="Herta Card System",
+                    title=f"{panel_img_result['chara_name']}",
                     color=discord.Colour.dark_purple(),
                 )
 
                 # 重み
                 weight_text = ""
                 if select_number == 0 and "assistAvatarDetail" in user_detail_dict['detailInfo']:
-                    weight_dict = generate.utils.get_weight(
-                        user_detail_dict['detailInfo']["assistAvatarDetail"]["avatarId"])
+                    avatar_id = user_detail_dict['detailInfo']["assistAvatarDetail"]["avatarId"]
+                    weight_dict = generate.utils.get_weight(avatar_id)
                 elif "assistAvatarDetail" not in user_detail_dict['detailInfo']:
-                    weight_dict = generate.utils.get_weight(
-                        user_detail_dict['detailInfo']["avatarDetailList"][select_number]["avatarId"])
+                    avatar_id = user_detail_dict['detailInfo']["avatarDetailList"][select_number]["avatarId"]
+                    weight_dict = generate.utils.get_weight(avatar_id)
                 else:
-                    weight_dict = generate.utils.get_weight(
-                        user_detail_dict['detailInfo']["avatarDetailList"][select_number-1]["avatarId"])
+                    avatar_id = user_detail_dict['detailInfo']["avatarDetailList"][select_number-1]["avatarId"]
+                    weight_dict = generate.utils.get_weight(avatar_id)
                 for k, v in weight_dict.items():
                     if v == 0:
                         continue
                     weight_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
                 res_embed.add_field(name="重み", value=weight_text)
+
+                score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
+                # 統計
+                rank_text = ""
+                rank_text += f"{i18n.t('message.Mean', locale=lang)}: {score_rank['mean']}\n"
+                rank_text += f"{i18n.t('message.Median', locale=lang)}: {score_rank['median']}\n"
+                rank_text += f"{i18n.t('message.Rank', locale=lang)}: {score_rank['rank']} / {score_rank['data_count']}\n"
+                rank_text += f"{i18n.t('message.high_score', locale=lang)}: {score_rank['top_score']}\n"
+                res_embed.add_field(name="統計", value=rank_text)
 
                 res_embed.set_image(url=f"attachment://{file.filename}")
                 await interaction.followup.send(embed=res_embed, file=file)

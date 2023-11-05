@@ -26,3 +26,7 @@ jp:
   StatusProbabilityBase: "効果命中"
   StatusResistanceBase: "効果抵抗"
   BreakDamageAddedRatioBase: "撃破特攻"
+  Median: "中央値"
+  Mean: "平均値"
+  Rank: "順位"
+  high_score: "ハイスコア"
