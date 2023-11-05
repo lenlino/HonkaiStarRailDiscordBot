@@ -181,10 +181,11 @@ def get_score_rank(chara_id, uid, score):
     json_path = f"{os.path.dirname(os.path.abspath(__file__))}/scores/{chara_id}.json"
     result = {}
     if os.path.exists(json_path):
-        df = pd.read_json(json_path)
+        df = pd.read_json(json_path, orient='columns', dtype=False)
     else:
         df = pd.DataFrame({"score": {}, "rank": {}})
-    uid = str(uid)
+    print(df)
+    uid = str(uid)+'u'
     before_score = df["score"].get(uid, 0)
     df.loc[uid] = [score, 0]
     df['rank'] = df['score'].rank(ascending=False, method='min')

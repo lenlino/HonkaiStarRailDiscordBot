@@ -90,7 +90,7 @@ class CardCommand(commands.Cog):
                 file = discord.File(image_binary, f"hertacardsys_{dt_now.strftime('%Y%m%d%H%M')}.png")
                 res_embed = discord.Embed(
                     title=f"{panel_img_result['chara_name']}",
-                    color=discord.Colour.dark_purple(),
+                    color=discord.Colour.dark_blue(),
                 )
 
                 # 重み
@@ -113,10 +113,10 @@ class CardCommand(commands.Cog):
                 score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
                 # 統計
                 rank_text = ""
-                rank_text += f"{i18n.t('message.Mean', locale=lang)}: {score_rank['mean']}\n"
-                rank_text += f"{i18n.t('message.Median', locale=lang)}: {score_rank['median']}\n"
                 rank_text += f"{i18n.t('message.Rank', locale=lang)}: {score_rank['rank']} / {score_rank['data_count']}\n"
                 rank_text += f"{i18n.t('message.high_score', locale=lang)}: {score_rank['top_score']}\n"
+                rank_text += f"{i18n.t('message.Mean', locale=lang)}: {score_rank['mean']}\n"
+                rank_text += f"{i18n.t('message.Median', locale=lang)}: {score_rank['median']}\n"
                 res_embed.add_field(name="統計", value=rank_text)
 
                 res_embed.set_image(url=f"attachment://{file.filename}")
@@ -181,9 +181,10 @@ class CardCommand(commands.Cog):
 
         embed = discord.Embed(
             title="Herta Card System",
-            color=discord.Colour.dark_purple(),
+            color=discord.Colour.dark_blue(),
             description=i18n.t("message.loading", locale=lang),
         )
+        embed.add_field(name="プライバシーポリシーの更新(2023-11-05)", value="スコアの統計を取るため、新たにハイスコアがサーバー上に保存されるようになりました。このデータは当ボット上でのみ使用します。")
 
         await ctx.send_followup(embed=embed, view=get_view())
         if uid is None:
