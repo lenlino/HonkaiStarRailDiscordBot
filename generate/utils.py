@@ -2,6 +2,7 @@ import io
 import json
 import os
 import pathlib
+import pandas as pd
 
 import aiohttp
 from PIL import Image
@@ -80,7 +81,9 @@ async def get_relic_score(chara_id, relic_json):
     sub_affix_formulas = []
     for sub_affix_json in relic_json["sub_affix"]:
         sub_affix_type = sub_affix_json["type"]
-        score = sub_affix_json["value"] / max_json[sub_affix_type] * weight_json[chara_id]["weight"][sub_affix_type]
+        # print(f"{weight_json[chara_id]['weight'][sub_affix_type]}/{sub_affix_type}")
+        # print(f"{weight_json[chara_id]['weight']}")
+        score = (sub_affix_json["value"] / max_json[sub_affix_type]) * weight_json[chara_id]["weight"][sub_affix_type]
         sub_affix_score += score
         sub_affix_formulas.append(
             f'{round(sub_affix_json["value"] / max_json[sub_affix_type] * 100, 1)}×{round(weight_json[chara_id]["weight"][sub_affix_type], 1)}')
@@ -166,3 +169,39 @@ def get_mihomo_lang(discord_lang):
         return "cn"
     else:
         return "en"
+
+
+def get_weight(chara_id):
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
+        weight_json = json.load(f)
+    return weight_json[str(chara_id)]["weight"]
+
+
+def get_score_rank(chara_id, uid, score):
+    json_path = f"{os.path.dirname(os.path.abspath(__file__))}/scores/{chara_id}.json"
+    result = {}
+    if os.path.exists(json_path):
+        df = pd.read_json(json_path, orient='columns')
+    else:
+        df = pd.DataFrame({"score": {}, "rank": {}})
+    uid = str(uid)+'u'
+    before_score = df["score"].get(uid, 0)
+    df.loc[uid] = [score, 0]
+    df['rank'] = df['score'].rank(ascending=False, method='min')
+    if before_score > score:
+        df["score"][uid] = before_score
+        result['top_score'] = round(before_score, 1)
+    else:
+        result['top_score'] = round(score, 1)
+
+    df.to_json(json_path)
+
+    result["before_score"] = before_score
+    result['median'] = round(df.median()['score'], 1)
+    result['mean'] = round(df.mean()['score'], 1)
+    result['rank'] = int(round(df['rank'].get(uid, 1), 0))
+    result['data_count'] = len(df)
+
+    return result
+
+
