@@ -7,6 +7,7 @@ import pandas as pd
 import aiohttp
 from PIL import Image
 
+conn = aiohttp.TCPConnector(limit_per_host=1)
 
 async def get_image_from_url(url: str):
     replaced_path = url.replace("https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/", "")
@@ -16,14 +17,14 @@ async def get_image_from_url(url: str):
     print(f"{os.path.dirname(os.path.abspath(__file__))}/{replaced_path}")
     filepath = pathlib.Path(f"{os.path.dirname(os.path.abspath(__file__))}/{replaced_path}")
     filepath.parent.mkdir(parents=True, exist_ok=True)
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
         async with session.get(url) as response:
             Image.open(io.BytesIO(await response.content.read())).save(filepath, quality=95)
             return f"{os.path.dirname(os.path.abspath(__file__))}/{replaced_path}"
 
 
 async def get_json_from_url(url: str):
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
         async with session.get(url) as response:
             return await response.json()
 
