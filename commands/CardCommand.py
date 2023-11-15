@@ -146,7 +146,10 @@ class CardCommand(commands.Cog):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
-                await ctx.edit(view=get_view())
+                if len(selecter.options) == 0:
+                    embed.description += "\n"+i18n.t("message.error_no_chara_set", locale=lang)
+                else:
+                    await ctx.edit(view=get_view())
             elif info["detail"] == "Queue timeout":
                 embed.description = i18n.t("message.error_queue_timeout", locale=lang)
             else:

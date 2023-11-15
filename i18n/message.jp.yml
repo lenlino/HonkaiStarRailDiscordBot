@@ -7,6 +7,7 @@ jp:
   error_uid_not_set: "UIDが設定されていません。"
   error_queue_timeout: "APIサーバーがダウンしています。復旧までお待ちください。 (Queue timeout)"
   error_not_exist_uid: "未設定もしくは存在しないUIDです。"
+  error_no_chara_set: "キャラクターがセットされていません。"
   change_uid: "UID変更"
   nickname: "ニックネーム: "
   generate: "生成"

@@ -7,6 +7,7 @@ en:
   error_uid_not_set: "UID not set"
   error_queue_timeout: "API server is down. Please wait until recovery. (Queue timeout)"
   error_not_exist_uid: "UID is not specified or does not exist."
+  error_no_chara_set: "Character not set"
   change_uid: "Change UID"
   nickname: "Nickname: "
   generate: "Generate"
