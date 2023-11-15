@@ -16,3 +16,5 @@ yarl==1.9.2
 flask~=2.3.3
 python-dotenv~=1.0.0
 pandas~=2.1.2
+
+fastapi~=0.104.1
