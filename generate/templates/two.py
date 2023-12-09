@@ -142,40 +142,48 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         relic_score = round(relic_score_json["score"] * 100, 1)
         relic_full_score += relic_score
         relic_main_affix_name = '\n'.join(textwrap.wrap(i['main_affix']['name'], relic_main_affix_name_limit))
-        if index < 3:
-            draw.rounded_rectangle((1100, 50 + index * 330, 1490, 365 + index * 330), radius=2, fill=None,
-                                   outline=font_color, width=1)
-            img.paste(icon, (1110, 60 + index * 330), icon)
 
-            img.paste(main_attribute_icon, (1200, 62 + index * 330), main_attribute_icon)
-            draw.text((1240, 100 + index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}", font_color,
-                      font=retic_main_affix_title_font, anchor="lm")
+        if index >= 3:
+            relic_index = index - 3
+            yoko_zure = 400
+        else:
+            relic_index = index
+            yoko_zure = 0
+        draw.rounded_rectangle((1100 + yoko_zure, 50 + relic_index * 330, 1490 + yoko_zure, 365 + relic_index * 330), radius=2, fill=None,
+                               outline=font_color, width=1)
+        img.paste(icon, (1110 + yoko_zure, 60 + relic_index * 330), icon)
 
-            draw.rounded_rectangle((1195, 145 + index * 330, 1245, 173 + index * 330), radius=2, fill=None,
-                                   outline=font_color, width=2)
-            draw.text((1220, 160 + index * 330), f"+{i['level']}", font_color,
+        img.paste(main_attribute_icon, (1200 + yoko_zure, 62 + relic_index * 330), main_attribute_icon)
+        draw.text((1240 + yoko_zure, 100 + relic_index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}", font_color,
+                  font=retic_main_affix_title_font, anchor="lm")
+
+        draw.rounded_rectangle((1195 + yoko_zure, 145 + relic_index * 330, 1245 + yoko_zure, 173 + relic_index * 330), radius=2, fill=None,
+                               outline=font_color, width=2)
+        draw.text((1220 + yoko_zure, 160 + relic_index * 330), f"+{i['level']}", font_color,
+                  font=retic_title_font, anchor="mm")
+
+        # スコア
+        if calculating_standard != "no_score":
+            draw.text((1440 + yoko_zure, 135 + relic_index * 330), f"{relic_score}", font_color,
                       font=retic_title_font, anchor="mm")
-
-            # スコア
-            if calculating_standard != "no_score":
-                draw.text((1440, 135 + index * 330), f"{relic_score}", font_color,
-                      font=retic_title_font, anchor="mm")
-                draw.text((1440, 95 + index * 330), f"{get_relic_score_text(relic_score)}", font_color,
+            draw.text((1440 + yoko_zure, 95 + relic_index * 330), f"{get_relic_score_text(relic_score)}", font_color,
                       font=title_font, anchor="mm")
 
-            img.paste(star_img, (1075, 140 + index * 330), star_img)
-            for sub_index, sub_i in enumerate(i["sub_affix"]):
-                sub_affix_icon = Image.open(await get_image_from_url(
+        img.paste(star_img, (1075 + yoko_zure, 140 + relic_index * 330), star_img)
+        for sub_index, sub_i in enumerate(i["sub_affix"]):
+            sub_affix_icon = Image.open(await get_image_from_url(
                 f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{sub_i['icon']}")).resize(
                 (40, 40))
-                img.paste(sub_affix_icon, (1100, 175 + index * 330 + sub_index * 50), sub_affix_icon)
-                draw.text((1140, 180 + index * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
-                          font=retic_title_font)
-                draw.text((1480, 180 + index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
-                          font=retic_title_font, anchor='ra')
-                if calculating_standard != "no_score":
-                    draw.text((1480, 165 + index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+            img.paste(sub_affix_icon, (1100 + yoko_zure, 175 + relic_index * 330 + sub_index * 50), sub_affix_icon)
+            draw.text((1140 + yoko_zure, 180 + relic_index * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
+                      font=retic_title_font)
+            draw.text((1480 + yoko_zure, 180 + relic_index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
+                      font=retic_title_font, anchor='ra')
+            if calculating_standard != "no_score":
+                draw.text((1480 + yoko_zure, 165 + relic_index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
+        '''if index < 3:
+
         else:
             draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=1)
@@ -209,7 +217,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                           font=retic_title_font, anchor='ra')
                 if calculating_standard != "no_score":
                     draw.text((1880, 165 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
-                          "#808080", font=retic_formula_font, anchor='ra')
+                          "#808080", font=retic_formula_font, anchor='ra')'''
 
     #relic合計スコアor遺物組み合わせ
     draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
