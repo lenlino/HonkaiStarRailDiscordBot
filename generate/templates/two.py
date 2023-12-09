@@ -22,11 +22,11 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
     if lang == "jp" or lang == "cn" or lang == "cht":
         light_cone_name_limit = 9
         chara_name_limit = 5
-        relic_main_affix_name_limit = 7
+        relic_main_affix_name_limit = 6
     else:
         light_cone_name_limit = 18
         chara_name_limit = 18
-        relic_main_affix_name_limit = 12
+        relic_main_affix_name_limit = 10
     helta_json = json["characters"][int(chara_id)]
     img = Image.open(f"{get_file_path()}/assets/bkg.png").convert(
         'RGBA')
@@ -135,6 +135,9 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         star_img = Image.open(await get_image_from_url(
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(i['rarity'])}")).resize(
             (153, 36))
+        main_attribute_icon = Image.open(await get_image_from_url(
+            f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{i['main_affix']['icon']}")).resize(
+            (42, 42))
         relic_score_json = await get_relic_score(helta_json["id"], i)
         relic_score = round(relic_score_json["score"] * 100, 1)
         relic_full_score += relic_score
@@ -144,7 +147,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                                    outline=font_color, width=1)
             img.paste(icon, (1110, 60 + index * 330), icon)
 
-            draw.text((1220, 100 + index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}", font_color,
+            img.paste(main_attribute_icon, (1200, 62 + index * 330), main_attribute_icon)
+            draw.text((1240, 100 + index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}", font_color,
                       font=retic_main_affix_title_font, anchor="lm")
 
             draw.rounded_rectangle((1195, 145 + index * 330, 1245, 173 + index * 330), radius=2, fill=None,
@@ -161,7 +165,11 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
 
             img.paste(star_img, (1075, 140 + index * 330), star_img)
             for sub_index, sub_i in enumerate(i["sub_affix"]):
-                draw.text((1110, 180 + index * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
+                sub_affix_icon = Image.open(await get_image_from_url(
+                f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{sub_i['icon']}")).resize(
+                (40, 40))
+                img.paste(sub_affix_icon, (1100, 175 + index * 330 + sub_index * 50), sub_affix_icon)
+                draw.text((1140, 180 + index * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
                           font=retic_title_font)
                 draw.text((1480, 180 + index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
@@ -173,8 +181,9 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                                    outline=font_color, width=1)
             img.paste(icon, (1510, 60 + (index - 3) * 330), icon)
 
-            draw.text((1610, 100 + (index - 3) * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}",
-                      font_color, font=retic_main_affix_title_small_font, anchor="lm")
+            img.paste(main_attribute_icon, (1600, 62 + (index - 3) * 330), main_attribute_icon)
+            draw.text((1640, 100 + (index - 3) * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}",
+                      font_color, font=retic_main_affix_title_font, anchor="lm")
 
             draw.rounded_rectangle((1595, 145 + (index - 3) * 330, 1645, 173 + (index - 3) * 330), radius=2, fill=None,
                                    outline=font_color, width=2)
@@ -190,7 +199,11 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
 
             img.paste(star_img, (1475, 145 + (index - 3) * 330), star_img)
             for sub_index, sub_i in enumerate(i["sub_affix"]):
-                draw.text((1510, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
+                sub_affix_icon = Image.open(await get_image_from_url(
+                    f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{sub_i['icon']}")).resize(
+                    (40, 40))
+                img.paste(sub_affix_icon, (1500, 175 + (index - 3) * 330 + sub_index * 50), sub_affix_icon)
+                draw.text((1540, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
                           font=retic_title_font)
                 draw.text((1880, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                           font=retic_title_font, anchor='ra')
