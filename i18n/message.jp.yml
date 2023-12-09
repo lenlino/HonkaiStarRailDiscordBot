@@ -31,3 +31,5 @@ jp:
   Mean: "平均値"
   Rank: "順位"
   high_score: "ハイスコア"
+  weight: "重み"
+  stats: "統計"

@@ -103,7 +103,7 @@ class CardCommand(commands.Cog):
                     if v == 0:
                         continue
                     weight_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
-                res_embed.add_field(name="重み", value=weight_text)
+                res_embed.add_field(name=i18n.t(f'message.weight', locale=lang), value=weight_text)
 
                 score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
                 # 統計
@@ -112,7 +112,7 @@ class CardCommand(commands.Cog):
                 rank_text += f"{i18n.t('message.high_score', locale=lang)}: {score_rank['top_score']}\n"
                 rank_text += f"{i18n.t('message.Mean', locale=lang)}: {score_rank['mean']}\n"
                 rank_text += f"{i18n.t('message.Median', locale=lang)}: {score_rank['median']}\n"
-                res_embed.add_field(name="統計", value=rank_text)
+                res_embed.add_field(name=i18n.t(f'message.stats', locale=lang), value=rank_text)
 
                 res_embed.set_image(url=f"attachment://{file.filename}")
                 await interaction.followup.send(embed=res_embed, file=file)
@@ -183,7 +183,6 @@ class CardCommand(commands.Cog):
             color=discord.Colour.dark_blue(),
             description=i18n.t("message.loading", locale=lang),
         )
-        embed.add_field(name="プライバシーポリシーの更新(2023-11-05)", value="スコアの統計を取るため、新たにハイスコアがサーバー上に保存されるようになりました。このデータは当ボット上でのみ使用します。")
 
         await ctx.send_followup(embed=embed, view=get_view())
         if uid is None:
