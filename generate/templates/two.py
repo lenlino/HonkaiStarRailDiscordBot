@@ -16,7 +16,7 @@ font_file_path = f"{get_file_path()}/assets/zh-cn.ttf"
 
 
 async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculating_standard="compatibility",
-                         lang="jp"):
+                         lang="jp", is_hide_roll=False):
     font_color = "#f0eaca"
     touka_color = "#191919"
     json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
@@ -185,23 +185,25 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             draw.text((1480 + yoko_zure, 180 + relic_index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                       font=retic_title_font, anchor='ra')
 
-            rolls = get_rolls(i['rarity'], sub_i)
-            drew_rolls = [0, 0, 0]
-            for roll_high in range(rolls[0] + rolls[1] + rolls[2]):
-                if drew_rolls[2] < rolls[2]:
-                    roll_len = 40
-                    roll = 2
-                elif drew_rolls[1] < rolls[1]:
-                    roll_len = 25
-                    roll = 1
-                else:
-                    roll_len = 10
-                    roll = 0
-                before_rolls_len = get_roll_line_margin(drew_rolls)
-                draw.line([(1140 + yoko_zure + before_rolls_len, 177 + relic_index * 330 + sub_index * 50),
-                           (1140 + roll_len + yoko_zure + before_rolls_len, 177 + relic_index * 330 + sub_index * 50)],
-                          fill=font_color, width=2)
-                drew_rolls[roll] += 1
+            if is_hide_roll is False:
+                rolls = get_rolls(i['rarity'], sub_i)
+                drew_rolls = [0, 0, 0]
+                for roll_high in range(rolls[0] + rolls[1] + rolls[2]):
+                    if drew_rolls[2] < rolls[2]:
+                        roll_len = 40
+                        roll = 2
+                    elif drew_rolls[1] < rolls[1]:
+                        roll_len = 25
+                        roll = 1
+                    else:
+                        roll_len = 10
+                        roll = 0
+                    before_rolls_len = get_roll_line_margin(drew_rolls)
+                    draw.line([(1140 + yoko_zure + before_rolls_len, 177 + relic_index * 330 + sub_index * 50),
+                               (1140 + roll_len + yoko_zure + before_rolls_len,
+                                177 + relic_index * 330 + sub_index * 50)],
+                              fill=font_color, width=2)
+                    drew_rolls[roll] += 1
 
             if calculating_standard != "no_score":
                 draw.text((1480 + yoko_zure, 165 + relic_index * 330 + sub_index * 50),
