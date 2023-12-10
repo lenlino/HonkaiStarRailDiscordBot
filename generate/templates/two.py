@@ -15,7 +15,8 @@ from generate.utils import get_json_from_url, get_json_from_json, get_image_from
 font_file_path = f"{get_file_path()}/assets/zh-cn.ttf"
 
 
-async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculating_standard="compatibility", lang="jp"):
+async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculating_standard="compatibility",
+                         lang="jp"):
     font_color = "#f0eaca"
     touka_color = "#191919"
     json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
@@ -94,12 +95,13 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             draw.text((1050, 150 + index * 60 + 18), f"+{addition.get('display', '0')}", "#9be802", spacing=10,
                       align='right',
                       font=small_font, anchor='ra')
-            draw.text((980, 150 + index * 60), f"{math.floor((float(i['value']) + float(addition.get('value', '0')))*1000)/10}%", font_color,
+            draw.text((980, 150 + index * 60),
+                      f"{math.floor((float(i['value']) + float(addition.get('value', '0'))) * 1000) / 10}%", font_color,
                       font=normal_font, anchor='ra')
     show_count = 0
     for index, i in enumerate(helta_json["properties"]):
         if i["field"] == "sp_rate":
-            i["display"] = str(round((i["value"] + 1) * 100, 1))+"%"
+            i["display"] = str(round((i["value"] + 1) * 100, 1)) + "%"
         if i["field"] != "def" and i["field"] != "crit_rate" and i["field"] != "atk" and i["field"] != "hp" and i[
             "field"] != "crit_dmg" and i["field"] != "spd":
             icon = Image.open(await get_image_from_url(
@@ -115,8 +117,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             show_count += 1
 
     # キャラタイトル
-    draw.multiline_text((500, 140), '\n'.join(textwrap.wrap(helta_json['name'], chara_name_limit)), "#f0eaca", anchor="ld", font=title_font)
-
+    draw.multiline_text((500, 140), '\n'.join(textwrap.wrap(helta_json['name'], chara_name_limit)), "#f0eaca",
+                        anchor="ld", font=title_font)
 
     draw.line(((490, 135), (1060, 135)), fill=font_color, width=3)
     path_icon = Image.open(await get_image_from_url(
@@ -149,15 +151,18 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
         else:
             relic_index = index
             yoko_zure = 0
-        draw.rounded_rectangle((1100 + yoko_zure, 50 + relic_index * 330, 1490 + yoko_zure, 365 + relic_index * 330), radius=2, fill=None,
+        draw.rounded_rectangle((1100 + yoko_zure, 50 + relic_index * 330, 1490 + yoko_zure, 365 + relic_index * 330),
+                               radius=2, fill=None,
                                outline=font_color, width=1)
         img.paste(icon, (1110 + yoko_zure, 60 + relic_index * 330), icon)
 
         img.paste(main_attribute_icon, (1200 + yoko_zure, 62 + relic_index * 330), main_attribute_icon)
-        draw.text((1240 + yoko_zure, 100 + relic_index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}", font_color,
+        draw.text((1240 + yoko_zure, 100 + relic_index * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}",
+                  font_color,
                   font=retic_main_affix_title_font, anchor="lm")
 
-        draw.rounded_rectangle((1195 + yoko_zure, 145 + relic_index * 330, 1245 + yoko_zure, 173 + relic_index * 330), radius=2, fill=None,
+        draw.rounded_rectangle((1195 + yoko_zure, 145 + relic_index * 330, 1245 + yoko_zure, 173 + relic_index * 330),
+                               radius=2, fill=None,
                                outline=font_color, width=2)
         draw.text((1220 + yoko_zure, 160 + relic_index * 330), f"+{i['level']}", font_color,
                   font=retic_title_font, anchor="mm")
@@ -179,47 +184,31 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                       font=retic_title_font)
             draw.text((1480 + yoko_zure, 180 + relic_index * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
                       font=retic_title_font, anchor='ra')
+
+            rolls = get_rolls(i['rarity'], sub_i)
+            drew_rolls = [0, 0, 0]
+            for roll_high in range(rolls[0] + rolls[1] + rolls[2]):
+                if drew_rolls[2] < rolls[2]:
+                    roll_len = 40
+                    roll = 2
+                elif drew_rolls[1] < rolls[1]:
+                    roll_len = 25
+                    roll = 1
+                else:
+                    roll_len = 10
+                    roll = 0
+                before_rolls_len = get_roll_line_margin(drew_rolls)
+                draw.line([(1140 + yoko_zure + before_rolls_len, 177 + relic_index * 330 + sub_index * 50),
+                           (1140 + roll_len + yoko_zure + before_rolls_len, 177 + relic_index * 330 + sub_index * 50)],
+                          fill=font_color, width=2)
+                drew_rolls[roll] += 1
+
             if calculating_standard != "no_score":
-                draw.text((1480 + yoko_zure, 165 + relic_index * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
+                draw.text((1480 + yoko_zure, 165 + relic_index * 330 + sub_index * 50),
+                          f"{relic_score_json['sub_formulas'][sub_index]}",
                           "#808080", font=retic_formula_font, anchor='ra')
-        '''if index < 3:
 
-        else:
-            draw.rounded_rectangle((1500, 50 + (index - 3) * 330, 1890, 365 + (index - 3) * 330), radius=2, fill=None,
-                                   outline=font_color, width=1)
-            img.paste(icon, (1510, 60 + (index - 3) * 330), icon)
-
-            img.paste(main_attribute_icon, (1600, 62 + (index - 3) * 330), main_attribute_icon)
-            draw.text((1640, 100 + (index - 3) * 330), f"{relic_main_affix_name}\n{i['main_affix']['display']}",
-                      font_color, font=retic_main_affix_title_font, anchor="lm")
-
-            draw.rounded_rectangle((1595, 145 + (index - 3) * 330, 1645, 173 + (index - 3) * 330), radius=2, fill=None,
-                                   outline=font_color, width=2)
-            draw.text((1620, 160 + (index - 3) * 330), f"+{i['level']}", font_color,
-                      font=retic_title_font, anchor="mm")
-
-            # スコア
-            if calculating_standard != "no_score":
-                draw.text((1840, 135 + (index - 3) * 330), f"{relic_score}", font_color,
-                      font=retic_title_font, anchor="mm")
-                draw.text((1840, 95 + (index - 3) * 330), f"{get_relic_score_text(relic_score)}", font_color,
-                      font=title_font, anchor="mm")
-
-            img.paste(star_img, (1475, 145 + (index - 3) * 330), star_img)
-            for sub_index, sub_i in enumerate(i["sub_affix"]):
-                sub_affix_icon = Image.open(await get_image_from_url(
-                    f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{sub_i['icon']}")).resize(
-                    (40, 40))
-                img.paste(sub_affix_icon, (1500, 175 + (index - 3) * 330 + sub_index * 50), sub_affix_icon)
-                draw.text((1540, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['name']}", font_color,
-                          font=retic_title_font)
-                draw.text((1880, 180 + (index - 3) * 330 + sub_index * 50), f"{sub_i['display']}", font_color,
-                          font=retic_title_font, anchor='ra')
-                if calculating_standard != "no_score":
-                    draw.text((1880, 165 + (index - 3) * 330 + sub_index * 50), f"{relic_score_json['sub_formulas'][sub_index]}",
-                          "#808080", font=retic_formula_font, anchor='ra')'''
-
-    #relic合計スコアor遺物組み合わせ
+    # relic合計スコアor遺物組み合わせ
     draw.rounded_rectangle((50, 840, 450, 1000), radius=2, fill=None,
                            outline=font_color, width=1)
     if calculating_standard != "no_score":
@@ -231,9 +220,8 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                   font=card_font)
     else:
         for sets_index, sets in enumerate(helta_json["relic_sets"]):
-            draw.text((80, 865+sets_index*40), f"{sets['num']} - {sets['name']}", font_color,
-                  font=retic_main_affix_title_font)
-
+            draw.text((80, 865 + sets_index * 40), f"{sets['num']} - {sets['name']}", font_color,
+                      font=retic_main_affix_title_font)
 
     # カード
     if helta_json.get("light_cone"):
@@ -246,8 +234,10 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
             f"https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/{get_star_image_path_from_int(int(helta_json['light_cone']['rarity']))}")).resize(
             (214, 48))
         img.paste(card_img, (500, 840), card_img)
-        draw.multiline_text((700, 890), '\n'.join(textwrap.wrap(helta_json['light_cone']['name'], light_cone_name_limit)), font_color,
-                  font=card_font, anchor="lm")
+        draw.multiline_text((700, 890),
+                            '\n'.join(textwrap.wrap(helta_json['light_cone']['name'], light_cone_name_limit)),
+                            font_color,
+                            font=card_font, anchor="lm")
         draw.line(((680, 860), (680, 980)), fill=font_color, width=1)
         img.paste(card_star_img, (460, 950), card_star_img)
         draw.text((705, 930), f"Lv.{helta_json['light_cone']['level']}", font_color,
@@ -302,3 +292,32 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
     result['chara_name'] = helta_json['name']
     # img.save('lenna_square_pillow.png', quality=95)
     return result
+
+
+def get_rolls(rarity, stats):
+    with open(f"{get_file_path()}/rolls.json") as f:
+        rolls_json = json.load(f)
+    low = rolls_json[stats["type"]][str(rarity)][0]
+    mid = rolls_json[stats["type"]][str(rarity)][1]
+    high = rolls_json[stats["type"]][str(rarity)][2]
+    value = stats["value"]
+    result = None
+    max_margin = 100
+    for i in range(rarity + 1):
+        for j in range(rarity + 1):
+            for k in range(rarity + 1):
+                if i + j + k > rarity + 1:
+                    break
+                value_sum = i * low + j * mid + k * high
+                if abs(value_sum - value) < max_margin:
+                    max_margin = abs(value_sum - value)
+                    result = [i, j, k]
+    return result
+
+
+def get_roll_line_margin(before_line):
+    margin = 0
+    margin += before_line[0] * 15
+    margin += before_line[1] * 30
+    margin += before_line[2] * 45
+    return margin
