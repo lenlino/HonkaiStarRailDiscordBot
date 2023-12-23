@@ -11,7 +11,7 @@ font_file_path = f"{get_file_path()}/assets/zh-cn.ttf"
 async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculating_standard="compatibility"):
     font_color = "#f0eaca"
     touka_color = "#191919"
-    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang=jp")
+    json = await get_json_from_url(uid, "jp")
     helta_json = json["characters"][int(chara_id)]
     img = Image.open(f"{get_file_path()}/assets/bkg.png").convert(
         'RGBA')

@@ -153,15 +153,16 @@ class CardCommand(commands.Cog):
             await interaction.response.send_modal(modal)
 
         async def set_uid(changed_uid):
-            info = await get_json_from_url(f"https://api.mihomo.me/sr_info/{changed_uid}")
-            if "detail" not in info:
-                embed.description = f"{i18n.t('message.nickname', locale=lang)} {info['detailInfo']['nickname']}\nUID: {info['detailInfo']['uid']}"
-                nonlocal uid
-                nonlocal user_detail_dict
-                nonlocal json_parsed
-                user_detail_dict = info
-                uid = info['detailInfo']['uid']
-                json_parsed = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
+            nonlocal uid
+            nonlocal user_detail_dict
+            nonlocal json_parsed
+            json_parsed = await get_json_from_url(changed_uid, lang)
+
+            if "detail" not in json_parsed:
+                embed.description = f"{i18n.t('message.nickname', locale=lang)} {json_parsed['player']['nickname']}\nUID: {json_parsed['player']['uid']}"
+
+                user_detail_dict = json_parsed
+                uid = json_parsed['player']['uid']
                 selecter.options = []
                 for index, i in enumerate(json_parsed["characters"]):
                     selecter.append_option(
@@ -171,10 +172,14 @@ class CardCommand(commands.Cog):
                     embed.description += "\n" + i18n.t("message.error_no_chara_set", locale=lang)
                 else:
                     await ctx.edit(view=get_view())
-            elif info["detail"] == "Queue timeout":
-                embed.description = i18n.t("message.error_queue_timeout", locale=lang)
-            else:
+            elif json_parsed["detail"] == 400 or json_parsed["detail"] == 404:
                 embed.description = i18n.t("message.error_not_exist_uid", locale=lang)
+            elif json_parsed["detail"] == 429 or json_parsed["detail"] == 500 or json_parsed["detail"] == 503:
+                embed.description = i18n.t("message.error_general_error", locale=lang)
+            elif json_parsed["detail"] == 424:
+                embed.description = i18n.t("message.error_game_maintenance_error", locale=lang)
+            else:
+                embed.description = i18n.t("message.error_queue_timeout", locale=lang)
 
             await ctx.edit(embed=embed)
 

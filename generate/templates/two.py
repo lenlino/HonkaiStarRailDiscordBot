@@ -19,7 +19,7 @@ async def generate_panel(uid="805477392", chara_id=1, is_hideUID=False, calculat
                          lang="jp", is_hide_roll=False):
     font_color = "#f0eaca"
     touka_color = "#191919"
-    json = await get_json_from_url(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}")
+    json = await get_json_from_url(uid, lang)
     if lang == "jp" or lang == "cn" or lang == "cht":
         light_cone_name_limit = 9
         chara_name_limit = 5
