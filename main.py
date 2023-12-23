@@ -24,7 +24,7 @@ token = os.environ.get('HONKAI_TOKEN')
 async def init_bot():
     await utils.DataBase.init()
     status_update_task.start()
-    os.chdir('generate')
+    os.chdir(f"{os.path.dirname(os.path.abspath(__file__))}/generate")
     os.system("git clone --filter=blob:none --no-checkout https://github.com/Mar-7th/StarRailRes.git")
     os.chdir('StarRailRes')
     os.system("git sparse-checkout set index_min")
