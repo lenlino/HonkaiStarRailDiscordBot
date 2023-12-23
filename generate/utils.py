@@ -32,7 +32,7 @@ async def get_json_from_url(uid: str, lang: str):
         async with session.get(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}") as response:
             if response.status == 200:
                 result_json = await response.json()
-    if "detail" in result_json or result_json is None:
+    if result_json is None or "detail" in result_json:
         filepath = pathlib.Path(f"{os.path.dirname(os.path.abspath(__file__))}/StarRailRes/index_min/{lang}")
         index = Index(filepath)
         async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
