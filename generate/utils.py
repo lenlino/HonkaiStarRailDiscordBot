@@ -27,19 +27,19 @@ async def get_image_from_url(url: str):
 
 
 async def get_json_from_url(uid: str, lang: str):
-    result_json = None
+    result_json = {}
     async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
         async with session.get(f"https://api.mihomo.me/sr_info_parsed/{uid}?lang={lang}") as response:
             if response.status == 200:
                 result_json = await response.json()
-    if result_json is None or "detail" in result_json:
+    if len(result_json.keys()) == 0 or "detail" in result_json:
         filepath = pathlib.Path(f"{os.path.dirname(os.path.abspath(__file__))}/StarRailRes/index_min/{lang}")
         index = Index(filepath)
         async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
             async with session.get(f"https://enka.network/api/hsr/uid/{uid}") as response:
                 if response.status != 200:
                     result_json["detail"] = response.status
-                    return
+                    return result_json
                 enka_result_json = await response.json()
                 detail_info_json = enka_result_json["detailInfo"]
                 record_info_json = detail_info_json["recordInfo"]
