@@ -104,8 +104,9 @@ class CardCommand(commands.Cog):
                                                         is_hideUID=is_uid_hide
                                                         , calculating_standard=calculation_value, lang=lang,
                                                         is_hide_roll=is_roll_hide)
-                image_binary.write(panel_img_result['img'])
-
+                #image_binary.write(panel_img_result['img'])
+                panel_img = panel_img_result['img']
+                panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 dt_now = datetime.datetime.now()
                 file = discord.File(image_binary, f"hertacardsys_{dt_now.strftime('%Y%m%d%H%M')}.png")
@@ -125,7 +126,8 @@ class CardCommand(commands.Cog):
                     weight_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
                 res_embed.add_field(name=i18n.t(f'message.weight', locale=lang), value=weight_text)
 
-                score_rank = panel_img_result["header"]
+                #score_rank = panel_img_result["header"]
+                score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
                 # 統計
                 rank_text = ""
                 rank_text += f"{i18n.t('message.Rank', locale=lang)}: {score_rank['rank']} / {score_rank['data_count']}\n"
