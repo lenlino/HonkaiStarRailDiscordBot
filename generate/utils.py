@@ -26,6 +26,15 @@ async def get_image_from_url(url: str):
             return f"{os.path.dirname(os.path.abspath(__file__))}/{replaced_path}"
 
 
+async def get_json_from_urlpath(path: str):
+    async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
+        async with session.get(f"https://hcs.lenlino.com{path}") as response:
+            if response.status == 200:
+                result_json = await response.json()
+                return result_json
+            return None
+
+
 async def get_json_from_url(uid: str, lang: str):
     result_json = {}
     async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
@@ -255,11 +264,18 @@ def get_mihomo_lang(discord_lang):
     else:
         return "en"
 
+weight_dict = {}
 
-def get_weight(chara_id):
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
-        weight_json = json.load(f)
-    return weight_json[str(chara_id)]["weight"]
+
+async def get_weight(chara_id):
+    """with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
+        weight_json = json.load(f)"""
+
+    if weight_dict[str(chara_id)]:
+        return weight_dict[str(chara_id)]["weight"]
+    else:
+        weight_dict[str(chara_id)] = await get_json_from_urlpath(f"/weight/{chara_id}")
+        return await get_weight(chara_id)
 
 
 def get_score_rank(chara_id, uid, score):

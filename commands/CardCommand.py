@@ -129,7 +129,7 @@ class CardCommand(commands.Cog):
                 # 重み
                 weight_text = ""
                 avatar_id = json_parsed["characters"][select_number]['id']
-                weight_dict = generate.utils.get_weight(avatar_id)
+                weight_dict = await generate.utils.get_weight(avatar_id)
 
                 for k, v in weight_dict.items():
                     if v == 0:
