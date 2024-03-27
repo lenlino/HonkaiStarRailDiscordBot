@@ -271,7 +271,7 @@ async def get_weight(chara_id):
     """with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
         weight_json = json.load(f)"""
 
-    if weight_dict[str(chara_id)]:
+    if str(chara_id) in weight_dict:
         return weight_dict[str(chara_id)]["weight"]
     else:
         weight_dict[str(chara_id)] = await get_json_from_urlpath(f"/weight/{chara_id}")
