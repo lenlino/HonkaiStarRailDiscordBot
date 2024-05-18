@@ -24,7 +24,7 @@ class CardCommand(commands.Cog):
         uid_hide_button = Button()
         roll_hide_button = Button()
         select_number = 0
-        calculation_value = 0
+        calculation_value = "compatibility"
         is_uid_hide = False
         is_roll_hide = False
         lang = get_mihomo_lang(ctx.interaction.locale)
