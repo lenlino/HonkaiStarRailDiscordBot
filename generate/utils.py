@@ -99,8 +99,9 @@ async def get_json_from_url(uid: str, lang: str):
                     for relic in characters["relicList"]:
                         subaffix_list = []
                         for subaffix in relic["subAffixList"]:
-                            subaffix_list.append(SubAffixBasicInfo(id=str(subaffix["affixId"]), cnt=subaffix.get("cnt", 0),
-                                                                   step=subaffix.get("step", 0)))
+                            subaffix_list.append(
+                                SubAffixBasicInfo(id=str(subaffix["affixId"]), cnt=subaffix.get("cnt", 0),
+                                                  step=subaffix.get("step", 0)))
                         basic_relics.append(RelicBasicInfo(
                             id=str(relic["tid"]),
                             level=relic["level"],
@@ -264,7 +265,12 @@ def get_mihomo_lang(discord_lang):
     else:
         return "en"
 
+
 weight_dict = {}
+
+
+async def clear_weight_dict():
+    weight_dict.clear()
 
 
 async def get_weight(chara_id):
@@ -276,6 +282,13 @@ async def get_weight(chara_id):
     else:
         weight_dict[str(chara_id)] = await get_json_from_urlpath(f"/weight/{chara_id}")
         return await get_weight(chara_id)
+
+
+async def get_weight_list(chara_id):
+    """with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
+        weight_json = json.load(f)"""
+
+    return await get_json_from_urlpath(f"/weight_list/{chara_id}")
 
 
 def get_score_rank(chara_id, uid, score):

@@ -210,6 +210,7 @@ class CardCommand(commands.Cog):
             discord.SelectOption(label=i18n.t("message.compatibility_criteria", locale=lang), default=True,
                                  value="compatibility"),
             discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=False, value="no_score")]
+
         calculation_selecter.row = 1
         uid_hide_button.row = 4
         uid_hide_button.callback = uid_hide_button_callback
