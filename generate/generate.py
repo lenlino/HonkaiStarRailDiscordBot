@@ -21,7 +21,7 @@ async def generate_panel(uid="805477392", chara_id=1, template=1, is_hideUID=Fal
 
             if response.status == 200:
                 result_json["img"] = await response.read()
-                print(response.headers)
+                #print(response.headers)
                 result_json["header"] = {"score": response.headers.get("x-score"), "top_score": response.headers.get("x-top-score"),
                                          "before_score": response.headers.get("x-before-score"), "median": response.headers.get("x-median"),
                                          "mean": response.headers.get("x-mean"), "rank": response.headers.get("x-rank"),
