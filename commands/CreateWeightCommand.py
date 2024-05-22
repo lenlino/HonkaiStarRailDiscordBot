@@ -17,7 +17,7 @@ class CreateWeightCommand(commands.Cog):
     async def get_chara_types(ctx: discord.AutocompleteContext):
         return main.characters
 
-    @discord.slash_command(name="create_weight", description="Create weight", guild_ids=["864441028866080768"])
+    @discord.slash_command(name="create_weight", description="Create weight", guild_ids=["1118740618882072596"])
     async def create_weight_command(self, ctx,
                                     chara_id: discord.Option(required=True, description="キャラ", input_type=str,
                                                              autocomplete=discord.utils.basic_autocomplete(

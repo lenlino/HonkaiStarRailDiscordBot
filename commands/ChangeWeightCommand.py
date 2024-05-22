@@ -36,7 +36,7 @@ class ChangeWeightCommand(commands.Cog):
         else:
             return ["chara_idを先に指定してください"]
 
-    @discord.slash_command(name="change_weight", description="Change weight", guild_ids=["864441028866080768"])
+    @discord.slash_command(name="change_weight", description="Change weight", guild_ids=["1118740618882072596"])
     async def change_weight_command(self, ctx,
                                     chara_id: discord.Option(required=True, description="キャラ", input_type=str,
                                                              autocomplete=discord.utils.basic_autocomplete(
