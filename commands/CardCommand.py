@@ -1,6 +1,7 @@
 import datetime
 import io
 
+import aiohttp
 import discord
 import i18n
 from discord.ext import commands
@@ -34,7 +35,7 @@ class CardCommand(commands.Cog):
 
         def get_view():
             return View(selecter, calculation_selecter, generate_button, uid_change_button, uid_hide_button,
-                        roll_hide_button, timeout=600)
+                        roll_hide_button, timeout=3000)
 
         def update_uid_hide_button():
             if is_uid_hide:
@@ -52,12 +53,41 @@ class CardCommand(commands.Cog):
                 roll_hide_button.style = discord.ButtonStyle.gray
                 roll_hide_button.label = f"{i18n.t('message.hide_roll', locale=lang) + i18n.t('message.off', locale=lang)}"
 
+        async def update_calc_selector():
+            if len(json_parsed) == 0:
+                calculation_selecter.options = [discord.SelectOption(label="Loading...", default=True, value="no_score")]
+                return
+            chara_types = []
+            chara_id = json_parsed["characters"][select_number]["id"]
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"https://hcs.lenlino.com/weight_list/"
+                                       f"{chara_id}") as response:
+                    chara_type_json = await response.json()
+            is_first = True
+            for k, v in chara_type_json.items():
+                if "lang" in v and v["lang"]["jp"] != "string":
+                    jp_name = v["lang"]["jp"]
+                    en_name = v["lang"]["en"]
+                else:
+                    jp_name = i18n.t("message.compatibility_criteria", locale=lang)
+                    en_name = "compatibility"
+                chara_types.append(discord.SelectOption(label=jp_name, value=k, default=is_first))
+                if is_first:
+                    is_first = False
+            chara_types.append(
+                discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=is_first, value="no_score"))
+            calculation_selecter.options = chara_types
+
         async def selector_callback(interaction):
             try:
                 nonlocal select_number
                 select_number = int(selecter.values[0])
+                await update_calc_selector()
+                update_selector_option()
+                if len(selecter.options) != 0:
+                    await ctx.edit(view=get_view())
                 await interaction.response.send_message("")
-            except discord.errors.HTTPException:
+            except discord.errors.HTTPException as ex:
                 pass
 
         async def calculation_selector_callback(interaction):
@@ -116,8 +146,8 @@ class CardCommand(commands.Cog):
                     await set_uid(uid)
                     return
                 image_binary.write(panel_img_result['img'])
-                #panel_img = panel_img_result['img']
-                #panel_img.save(image_binary, 'PNG')
+                # panel_img = panel_img_result['img']
+                # panel_img.save(image_binary, 'PNG')
                 image_binary.seek(0)
                 dt_now = datetime.datetime.now()
                 file = discord.File(image_binary, f"hertacardsys_{dt_now.strftime('%Y%m%d%H%M')}.png")
@@ -138,7 +168,7 @@ class CardCommand(commands.Cog):
                 res_embed.add_field(name=i18n.t(f'message.weight', locale=lang), value=weight_text)
 
                 score_rank = panel_img_result["header"]
-                #score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
+                # score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
                 # 統計
                 rank_text = ""
                 rank_text += f"{i18n.t('message.Rank', locale=lang)}: {score_rank['rank']} / {score_rank['data_count']}\n"
@@ -164,6 +194,13 @@ class CardCommand(commands.Cog):
             modal.callback = uid_change_modal_callback
             await interaction.response.send_modal(modal)
 
+        def update_selector_option():
+            count = 0
+            for v in selecter.options:
+                is_select = count == select_number
+                selecter.options[count].default = is_select
+                count += 1
+
         async def set_uid(changed_uid):
             nonlocal uid
             nonlocal user_detail_dict
@@ -180,9 +217,11 @@ class CardCommand(commands.Cog):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
                                              default=True if index == select_number else False))
+
                 if len(selecter.options) == 0:
                     embed.description += "\n" + i18n.t("message.error_no_chara_set", locale=lang)
                 else:
+                    await update_calc_selector()
                     await ctx.edit(view=get_view())
             elif json_parsed["detail"] == 400 or json_parsed["detail"] == 404:
                 embed.description = i18n.t("message.error_not_exist_uid", locale=lang)
@@ -206,10 +245,7 @@ class CardCommand(commands.Cog):
         uid_change_button.callback = uid_change_button_callback
         uid_change_button.row = 4
         calculation_selecter.callback = calculation_selector_callback
-        calculation_selecter.options = [
-            discord.SelectOption(label=i18n.t("message.compatibility_criteria", locale=lang), default=True,
-                                 value="compatibility"),
-            discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=False, value="no_score")]
+        await update_calc_selector()
 
         calculation_selecter.row = 1
         uid_hide_button.row = 4

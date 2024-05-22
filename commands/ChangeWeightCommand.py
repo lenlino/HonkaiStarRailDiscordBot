@@ -1,6 +1,8 @@
 import datetime
 import io
+import json
 
+import aiohttp
 import discord
 import i18n
 from discord.ext import commands
@@ -12,53 +14,101 @@ from generate.generate import generate_panel
 from generate.utils import get_json_from_url, get_mihomo_lang
 
 
-class CreateWeightCommand(commands.Cog):
+class ChangeWeightCommand(commands.Cog):
 
     async def get_chara_types(ctx: discord.AutocompleteContext):
-        return main.characters
+        chara_id = ctx.options["chara_id"]
+        if chara_id is not None:
+            chara_types = []
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"https://hcs.lenlino.com/weight_list/"
+                                       f"{chara_id}") as response:
+                    chara_type_json = await response.json()
+            for k, v in chara_type_json.items():
+                if "lang" in v and v["lang"]["jp"] != "string":
+                    jp_name = v["lang"]["jp"]
+                    en_name = v["lang"]["en"]
+                else:
+                    jp_name = "相性基準"
+                    en_name = "def"
+                chara_types.append(discord.OptionChoice(name=jp_name, value=en_name))
+            return chara_types
+        else:
+            return ["chara_idを先に指定してください"]
 
-    @discord.slash_command(name="create_weight", description="Create weight", guild_ids=["864441028866080768"])
-    async def create_weight_command(self, ctx,
+    @discord.slash_command(name="change_weight", description="Change weight", guild_ids=["864441028866080768"])
+    async def change_weight_command(self, ctx,
                                     chara_id: discord.Option(required=True, description="キャラ", input_type=str,
                                                              autocomplete=discord.utils.basic_autocomplete(
                                                                  main.characters)),
-                                    jp_name: discord.Option(required=True, description="基準の日本語名（攻撃型、回復型など）"),
-                                    en_name: discord.Option(required=True, description="基準の英語名・スペース、記号禁止（attack、healなど）")):
+                                    type_id: discord.Option(required=True, description="基準名", input_type=str,
+                                                            autocomplete=discord.utils.basic_autocomplete(
+                                                                get_chara_types))):
         await ctx.defer()
         weight = utils.Weight.Weight()
+        base_weight = utils.Weight.Weight()
+        if type_id == "def":
+            weight_id = f"{chara_id}"
+        else:
+            weight_id = f"{chara_id}_{type_id}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"https://hcs.lenlino.com/weight_list/{weight_id}"
+                                   ) as response:
+                chara_type_json = await response.json()
+        weight = weight.model_validate(chara_type_json[weight_id])
+        base_weight = base_weight.model_validate(chara_type_json[weight_id])
         lang = get_mihomo_lang(ctx.interaction.locale)
         embed = discord.Embed(
             title=main.characters_name[chara_id]
         )
-        weight.lang.jp = jp_name
-        weight.lang.en = en_name
 
         async def update_embed():
             embed = discord.Embed(
-                title=f"{main.characters_name[chara_id]}・{jp_name}(投票中)",
-                description="追加申請",
+                title=f"{main.characters_name[chara_id]}・{weight.lang.jp}(投票中)",
+                description="修正申請",
                 colour=discord.Colour.gold()
             )
             embed_value = ""
+            base_weight_model = base_weight.model_dump()
             for k, v in weight.main.w3.model_dump().items():
-                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
-            embed.add_field(name="胴", value=embed_value)
+                base_value = base_weight_model["main"]["w3"][k]
+                if base_value == v:
+                    continue
+                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {base_value}->{v}\n"
+            if embed_value != "":
+                embed.add_field(name="胴", value=embed_value)
             embed_value = ""
             for k, v in weight.main.w4.model_dump().items():
-                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
-            embed.add_field(name="脚", value=embed_value)
-            embed_value = ""
-            for k, v in weight.main.w4.model_dump().items():
-                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
-            embed.add_field(name="オーブ", value=embed_value)
+                base_value = base_weight_model["main"]["w4"][k]
+                if base_value == v:
+                    continue
+                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {base_value}->{v}\n"
+            if embed_value != "":
+                embed.add_field(name="脚", value=embed_value)
             embed_value = ""
             for k, v in weight.main.w5.model_dump().items():
-                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
-            embed.add_field(name="縄", value=embed_value)
+                base_value = base_weight_model["main"]["w5"][k]
+                if base_value == v:
+                    continue
+                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {base_value}->{v}\n"
+            if embed_value != "":
+                embed.add_field(name="オーブ", value=embed_value)
+            embed_value = ""
+            for k, v in weight.main.w6.model_dump().items():
+                base_value = base_weight_model["main"]["w6"][k]
+                if base_value == v:
+                    continue
+                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {base_value}->{v}\n"
+            if embed_value != "":
+                embed.add_field(name="縄", value=embed_value)
             embed_value = ""
             for k, v in weight.weight.model_dump().items():
-                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
-            embed.add_field(name="サブステ", value=embed_value)
+                base_value = base_weight_model["weight"][k]
+                if base_value == v:
+                    continue
+                embed_value += f"{i18n.t('message.' + k, locale=lang)}: {base_value}->{v}\n"
+            if embed_value != "":
+                embed.add_field(name="サブステ", value=embed_value)
             await ctx.interaction.edit(embed=embed)
 
         class MyView(discord.ui.View):
@@ -100,7 +150,33 @@ class CreateWeightCommand(commands.Cog):
 
             @discord.ui.button(label="送信", style=discord.ButtonStyle.primary)
             async def button_callback_send(self, button, interaction):
-                attachment = discord.File(fp=io.BytesIO(bytes(weight.model_dump_json(), encoding="utf-8")), filename=f"{chara_id}.json")
+                nonlocal weight
+                weight_model = weight.model_dump()
+                base_weight_model = base_weight.model_dump()
+                for k, v in weight.main.w3.model_dump().items():
+                    base_value = base_weight_model["main"]["w3"][k]
+                    if base_value == v:
+                        weight_model["main"]["w3"][k] = 0
+                for k, v in weight.main.w4.model_dump().items():
+                    base_value = base_weight_model["main"]["w4"][k]
+                    if base_value == v:
+                        weight_model["main"]["w4"][k] = 0
+                for k, v in weight.main.w5.model_dump().items():
+                    base_value = base_weight_model["main"]["w5"][k]
+                    if base_value == v:
+                        weight_model["main"]["w5"][k] = 0
+                for k, v in weight.main.w6.model_dump().items():
+                    base_value = base_weight_model["main"]["w6"][k]
+                    if base_value == v:
+                        weight_model["main"]["w6"][k] = 0
+                for k, v in weight.weight.model_dump().items():
+                    base_value = base_weight_model["weight"][k]
+                    if base_value == v:
+                        weight_model["weight"][k] = 0
+
+                weight = weight.model_validate(weight_model)
+                attachment = discord.File(fp=io.BytesIO(bytes(weight.model_dump_json(), encoding="utf-8")),
+                                          filename=f"{chara_id}.json")
                 await interaction.edit(file=attachment, view=None)
                 await interaction.message.add_reaction("⭕")
                 await interaction.message.add_reaction("❌")
@@ -342,4 +418,4 @@ class CreateWeightCommand(commands.Cog):
 
 
 def setup(bot):  # this is called by Pycord to setup the cog
-    bot.add_cog(CreateWeightCommand(bot))  # add the cog to the bot
+    bot.add_cog(ChangeWeightCommand(bot))  # add the cog to the bot
