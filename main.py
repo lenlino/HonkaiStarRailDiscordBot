@@ -29,6 +29,7 @@ async def init_bot():
     os.chdir('StarRailRes')
     os.system("git sparse-checkout set index_min")
     os.system("git checkout")
+    os.system("git pull")
 
 
 @bot.event
