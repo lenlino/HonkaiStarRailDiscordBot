@@ -37,22 +37,7 @@ async def init_bot():
     os.system("git sparse-checkout set index_min")
     os.system("git checkout")
 
-    with open(f"{os.path.dirname(os.path.abspath(__file__))}/generate/StarRailRes/index_min/jp/characters.json",
-              encoding="utf-8") as f:
-        chara_json = json.load(f)
-        characters.clear()
-        for key, value in chara_json.items():
-            name = value["name"]
-            if key == "8001":
-                name = "主人公・壊滅・物理"
-            elif key == "8003":
-                name = "主人公・存護・炎"
-            elif key == "8005":
-                name = "主人公・調和・虚数"
-            elif int(key) > 8000:
-                continue
-            characters.append(discord.OptionChoice(name=name, value=key))
-            characters_name[key] = name
+
 
 
 @bot.event
@@ -71,6 +56,23 @@ async def status_update_task():
 
 @tasks.loop(hours=24)
 async def regi_weight_task():
+    with open(f"{os.path.dirname(os.path.abspath(__file__))}/generate/StarRailRes/index_min/jp/characters.json",
+              encoding="utf-8") as f:
+        chara_json = json.load(f)
+        characters.clear()
+        for key, value in chara_json.items():
+            name = value["name"]
+            if key == "8001":
+                name = "主人公・壊滅・物理"
+            elif key == "8003":
+                name = "主人公・存護・炎"
+            elif key == "8005":
+                name = "主人公・調和・虚数"
+            elif int(key) > 8000:
+                continue
+
+            characters.append(discord.OptionChoice(name=name, value=key))
+            characters_name[key] = name
     channel = bot.get_channel(1242779790914752592)
     async for mes in channel.history(before=(datetime.datetime.now() + datetime.timedelta(days=-3))):
         if len(mes.attachments) == 0:
