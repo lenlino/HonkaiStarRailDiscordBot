@@ -74,6 +74,9 @@ async def regi_weight_task():
 
             characters.append(discord.OptionChoice(name=name, value=key))
             characters_name[key] = name
+    bot.reload_extension('commands.CreateWeightCommand')
+    bot.reload_extension('commands.ChangeWeightCommand')
+
     channel = bot.get_channel(1242779790914752592)
     async for mes in channel.history(before=(datetime.datetime.now() + datetime.timedelta(days=-3))):
         if len(mes.attachments) == 0:

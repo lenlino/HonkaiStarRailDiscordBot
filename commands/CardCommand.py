@@ -63,7 +63,8 @@ class CardCommand(commands.Cog):
                 async with session.get(f"https://hcs.lenlino.com/weight_list/"
                                        f"{chara_id}") as response:
                     chara_type_json = await response.json()
-            is_first = True
+
+            is_defalut_set = False
             for k, v in chara_type_json.items():
                 if "lang" in v and v["lang"]["jp"] != "string":
                     jp_name = v["lang"]["jp"]
@@ -71,17 +72,22 @@ class CardCommand(commands.Cog):
                 else:
                     jp_name = i18n.t("message.compatibility_criteria", locale=lang)
                     en_name = "compatibility"
-                chara_types.append(discord.SelectOption(label=jp_name, value=k, default=is_first))
-                if is_first:
-                    is_first = False
+                nonlocal calculation_value
+                is_default = en_name == calculation_value
+                is_defalut_set = is_default
+                chara_types.append(discord.SelectOption(label=jp_name, value=en_name, default=is_default))
+            if is_defalut_set is False:
+                calculation_value = "no_score"
             chara_types.append(
-                discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=is_first, value="no_score"))
+                discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=not is_defalut_set, value="no_score"))
             calculation_selecter.options = chara_types
 
         async def selector_callback(interaction):
             try:
                 nonlocal select_number
                 select_number = int(selecter.values[0])
+                nonlocal calculation_value
+                calculation_value = "compatibility"
                 await update_calc_selector()
                 update_selector_option()
                 if len(selecter.options) != 0:
@@ -94,6 +100,7 @@ class CardCommand(commands.Cog):
             try:
                 nonlocal calculation_value
                 calculation_value = calculation_selecter.values[0]
+                await update_calc_selector()
                 await interaction.response.send_message("")
             except discord.errors.HTTPException:
                 pass
