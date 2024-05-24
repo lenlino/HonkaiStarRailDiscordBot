@@ -39,7 +39,8 @@ class ChangeWeightCommand(commands.Cog):
     @discord.slash_command(name="change_weight", description="Change weight", guild_ids=["1118740618882072596"])
     async def change_weight_command(self, ctx,
                                     chara_id: discord.Option(required=True, description="キャラ", input_type=str,
-                                                             options=main.characters),
+                                                             autocomplete=discord.utils.basic_autocomplete(
+                                                                 main.characters)),
                                     type_id: discord.Option(required=True, description="基準名", input_type=str,
                                                             autocomplete=discord.utils.basic_autocomplete(
                                                                 get_chara_types))):

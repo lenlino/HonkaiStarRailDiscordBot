@@ -20,7 +20,8 @@ class CreateWeightCommand(commands.Cog):
     @discord.slash_command(name="create_weight", description="Create weight", guild_ids=["1118740618882072596"])
     async def create_weight_command(self, ctx,
                                     chara_id: discord.Option(required=True, description="キャラ", input_type=str,
-                                                             options=main.characters),
+                                                             autocomplete=discord.utils.basic_autocomplete(
+                                                                 main.characters)),
                                     jp_name: discord.Option(required=True, description="基準の日本語名（攻撃型、回復型など）"),
                                     en_name: discord.Option(required=True, description="基準の英語名・スペース、記号禁止（attack、healなど）")):
         await ctx.defer()
