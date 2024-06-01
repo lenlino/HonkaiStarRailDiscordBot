@@ -155,23 +155,23 @@ class ChangeWeightCommand(commands.Cog):
                 for k, v in weight.main.w3.model_dump().items():
                     base_value = base_weight_model["main"]["w3"][k]
                     if base_value == v:
-                        weight_model["main"]["w3"][k] = 0
+                        weight_model["main"]["w3"][k] = -1
                 for k, v in weight.main.w4.model_dump().items():
                     base_value = base_weight_model["main"]["w4"][k]
                     if base_value == v:
-                        weight_model["main"]["w4"][k] = 0
+                        weight_model["main"]["w4"][k] = -1
                 for k, v in weight.main.w5.model_dump().items():
                     base_value = base_weight_model["main"]["w5"][k]
                     if base_value == v:
-                        weight_model["main"]["w5"][k] = 0
+                        weight_model["main"]["w5"][k] = -1
                 for k, v in weight.main.w6.model_dump().items():
                     base_value = base_weight_model["main"]["w6"][k]
                     if base_value == v:
-                        weight_model["main"]["w6"][k] = 0
+                        weight_model["main"]["w6"][k] = -1
                 for k, v in weight.weight.model_dump().items():
                     base_value = base_weight_model["weight"][k]
                     if base_value == v:
-                        weight_model["weight"][k] = 0
+                        weight_model["weight"][k] = -1
 
                 weight = weight.model_validate(weight_model)
                 attachment = discord.File(fp=io.BytesIO(bytes(weight.model_dump_json(), encoding="utf-8")),
