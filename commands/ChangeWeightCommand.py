@@ -10,7 +10,6 @@ from discord.ui import Select, Button, Modal, View
 
 import main
 import utils.Weight
-from generate.generate import generate_panel
 from generate.utils import get_json_from_url, get_mihomo_lang
 
 
@@ -21,7 +20,7 @@ class ChangeWeightCommand(commands.Cog):
         if chara_id is not None:
             chara_types = []
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://hcs.lenlino.com/weight_list/"
+                async with session.get(f"{main.be_address}/weight_list/"
                                        f"{chara_id}") as response:
                     chara_type_json = await response.json()
             for k, v in chara_type_json.items():
@@ -52,7 +51,7 @@ class ChangeWeightCommand(commands.Cog):
         else:
             weight_id = f"{chara_id}_{type_id}"
         async with aiohttp.ClientSession() as session:
-            async with session.get(f"https://hcs.lenlino.com/weight_list/{weight_id}"
+            async with session.get(f"{main.be_address}/weight_list/{weight_id}"
                                    ) as response:
                 chara_type_json = await response.json()
         weight = weight.model_validate(chara_type_json[weight_id])

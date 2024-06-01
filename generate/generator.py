@@ -1,22 +1,18 @@
-import io
-import json
-import math
 import os
-import pathlib
 
 import aiohttp
-from PIL import ImageDraw, Image, ImageFont
 
 from generate.templates import one, two
 from generate.utils import conn
 
 font_file_path = f"{os.path.dirname(os.path.abspath(__file__))}/assets/zh-cn.ttf"
+be_address = os.environ.get("BE_ADDRESS", "https://hcs.lenlino.com")
 
 
 async def generate_panel(uid="805477392", chara_id=1, template=1, is_hideUID=False, calculating_standard="compatibility", lang="jp", is_hide_roll=False):
     result_json = {}
     async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
-        async with session.get(f"https://hcs.lenlino.com/gen_card/{uid}?lang={lang}&select_number={chara_id}&calculation_value={calculating_standard}"
+        async with session.get(f"{be_address}/gen_card/{uid}?lang={lang}&select_number={chara_id}&calculation_value={calculating_standard}"
                                f"&is_uid_hide={is_hideUID}&is_hide_roll={is_hide_roll}") as response:
 
             if response.status == 200:

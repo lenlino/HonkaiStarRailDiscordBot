@@ -8,8 +8,9 @@ from discord.ext import commands
 from discord.ui import Select, Button, Modal, View
 
 import generate.utils
+import main
 import utils.DataBase
-from generate.generate import generate_panel
+from generate.generator import generate_panel
 from generate.utils import get_json_from_url, get_mihomo_lang
 
 
@@ -60,7 +61,7 @@ class CardCommand(commands.Cog):
             chara_types = []
             chara_id = json_parsed["characters"][select_number]["id"]
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://hcs.lenlino.com/weight_list/"
+                async with session.get(f"{main.be_address}/weight_list/"
                                        f"{chara_id}") as response:
                     chara_type_json = await response.json()
 
@@ -138,9 +139,9 @@ class CardCommand(commands.Cog):
                 await ctx.edit(view=get_view())
                 nonlocal select_number
                 panel_img_result = await generate_panel(uid=uid, chara_id=int(select_number), template=2,
-                                                        is_hideUID=is_uid_hide
-                                                        , calculating_standard=calculation_value, lang=lang,
-                                                        is_hide_roll=is_roll_hide)
+                                                                 is_hideUID=is_uid_hide
+                                                                 , calculating_standard=calculation_value, lang=lang,
+                                                                 is_hide_roll=is_roll_hide)
                 if "detail" in panel_img_result:
                     res_embed = discord.Embed(
                         title=f"Error",

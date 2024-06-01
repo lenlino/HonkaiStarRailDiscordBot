@@ -3,7 +3,7 @@ import io
 from flask import Flask
 from flask import send_file
 
-import generate.generate
+import generate.generator
 
 app = Flask(__name__)
 app.debug = True

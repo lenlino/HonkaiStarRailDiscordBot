@@ -1,15 +1,12 @@
-import datetime
 import io
 
 import discord
 import i18n
 from discord.ext import commands
-from discord.ui import Select, Button, Modal, View
 
 import main
 import utils.Weight
-from generate.generate import generate_panel
-from generate.utils import get_json_from_url, get_mihomo_lang
+from generate.utils import get_mihomo_lang
 
 
 class CreateWeightCommand(commands.Cog):

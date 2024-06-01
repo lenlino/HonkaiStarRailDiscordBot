@@ -9,7 +9,9 @@ from PIL import Image
 from starrailres import Index
 from starrailres.models.info import CharacterBasicInfo, LevelInfo, LightConeBasicInfo, SubAffixBasicInfo, RelicBasicInfo
 
+
 conn = aiohttp.TCPConnector(limit_per_host=1)
+be_address = os.environ.get('BE_ADDRESS', "https://hcs.lenlino.com")
 
 
 async def get_image_from_url(url: str):
@@ -28,7 +30,7 @@ async def get_image_from_url(url: str):
 
 async def get_json_from_urlpath(path: str):
     async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
-        async with session.get(f"https://hcs.lenlino.com{path}") as response:
+        async with session.get(f"{be_address}{path}") as response:
             if response.status == 200:
                 result_json = await response.json()
                 return result_json
@@ -38,7 +40,7 @@ async def get_json_from_urlpath(path: str):
 async def get_json_from_url(uid: str, lang: str):
     result_json = {}
     async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
-        async with session.get(f"https://hcs.lenlino.com/sr_info_parsed/{uid}?lang={lang}") as response:
+        async with session.get(f"{be_address}/sr_info_parsed/{uid}?lang={lang}") as response:
             if response.status == 200:
                 result_json = await response.json()
     if len(result_json.keys()) == 0 or "detail" in result_json:

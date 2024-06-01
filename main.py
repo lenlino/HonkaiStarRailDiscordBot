@@ -1,16 +1,13 @@
 import datetime
-import io
 import json
 import os
 
 import aiohttp
-import asyncpg as asyncpg
 import discord
 import discord.ext.commands.cog
 from discord.ext import tasks
 from dotenv import load_dotenv
 
-import backend.backend
 import generate.utils
 import i18n
 
@@ -23,6 +20,7 @@ import utils.DataBase
 
 bot = discord.AutoShardedBot()
 token = os.environ.get('HONKAI_TOKEN')
+be_address = os.environ.get('BE_ADDRESS', "https://hcs.lenlino.com")
 characters = []
 characters_name = {}
 
@@ -37,8 +35,6 @@ async def init_bot():
     os.system("git sparse-checkout set index_min")
     os.system("git checkout")
     os.system("git pull")
-
-
 
 
 @bot.event
@@ -94,15 +90,15 @@ async def regi_weight_task():
             if embed_title.endswith("(投票中)"):
                 if reactions[0].count >= reactions[1].count:
                     async with aiohttp.ClientSession() as session:
-                        async with session.post(f"https://hcs.lenlino.com/weight/"
+                        async with session.post(f"/weight/"
                                                 f"{chara_id}"
                             , json=weight_json) as response:
                             print(response)
                             pass
                     if chara_id.startswith("8"):
                         async with aiohttp.ClientSession() as session:
-                            async with session.post(f"https://hcs.lenlino.com/weight/"
-                                                    f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id)+1))}"
+                            async with session.post(f"{be_address}/weight/"
+                                                    f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id) + 1))}"
                                 , json=weight_json) as response:
                                 print(response)
                                 pass
@@ -116,14 +112,14 @@ async def regi_weight_task():
             if embed_title.endswith("(投票中)"):
                 if reactions[0].count >= reactions[1].count:
                     async with aiohttp.ClientSession() as session:
-                        async with session.put(f"https://hcs.lenlino.com/weight/{chara_id}"
+                        async with session.put(f"{be_address}/weight/{chara_id}"
                             , json=weight_json) as response:
                             print(await response.text())
                             pass
                     if chara_id.startswith("8"):
                         async with aiohttp.ClientSession() as session:
-                            async with session.put(f"https://hcs.lenlino.com/weight/"
-                                                    f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id)+1))}"
+                            async with session.put(f"{be_address}/weight/"
+                                                   f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id) + 1))}"
                                 , json=weight_json) as response:
                                 print(await response.text())
                                 pass
