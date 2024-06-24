@@ -10,7 +10,7 @@ multidict==6.0.4
 np==1.0.2
 numpy==1.24.3
 Pillow==9.5.0
-py-cord==2.4.1
+py-cord @ git+https://github.com/Pycord-Development/pycord@feat/ua
 yarl==1.9.2
 i18nice==0.9.1
 flask~=2.3.3

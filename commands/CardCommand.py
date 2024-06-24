@@ -16,7 +16,11 @@ from generate.utils import get_json_from_url, get_mihomo_lang
 
 class CardCommand(commands.Cog):
 
-    @discord.slash_command(name="card", description="Generate build card", guilds=["864441028866080768"])
+    @discord.slash_command(name="card", description="Generate build card", guilds=["864441028866080768"],
+                           integration_types={
+                               discord.IntegrationType.guild_install,
+                               discord.IntegrationType.user_install,
+                           },)
     async def card_command(self, ctx, uid: discord.Option(required=False, input_type=int, description="UID")):
         await ctx.defer()
         selecter = Select()
