@@ -41,8 +41,7 @@ class ChangeWeightCommand(commands.Cog):
                                                              autocomplete=discord.utils.basic_autocomplete(
                                                                  main.characters)),
                                     type_id: discord.Option(required=True, description="基準名", input_type=str,
-                                                            autocomplete=discord.utils.basic_autocomplete(
-                                                                get_chara_types))):
+                                                            autocomplete=get_chara_types)):
         await ctx.defer()
         weight = utils.Weight.Weight()
         base_weight = utils.Weight.Weight()
