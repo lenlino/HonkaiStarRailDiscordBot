@@ -24,7 +24,7 @@ class ChangeWeightCommand(commands.Cog):
                                        f"{chara_id}") as response:
                     chara_type_json = await response.json()
             for k, v in chara_type_json.items():
-                if "lang" in v and v["lang"]["jp"] != "string":
+                if "lang" in v and v["lang"]["jp"] != "string" and v["lang"]["jp"] != "":
                     jp_name = v["lang"]["jp"]
                     en_name = v["lang"]["en"]
                 else:
