@@ -82,7 +82,7 @@ async def regi_weight_task():
         embed_desc = embed.description
         reactions = mes.reactions
 
-        # print(f"{embed_title} {embed_desc}")
+        print(f"{embed_title} {embed_desc}")
 
         if weight_json["lang"]["en"] != "":
             chara_id = f"{mes.attachments[0].filename.replace('.json', '')}_{weight_json['lang']['en']}"
@@ -91,9 +91,10 @@ async def regi_weight_task():
 
         if embed_desc == "追加申請":
             if embed_title.endswith("(投票中)"):
+                print("kiku")
                 if reactions[0].count >= reactions[1].count:
                     async with aiohttp.ClientSession() as session:
-                        async with session.post(f"/weight/"
+                        async with session.post(f"{be_address}/weight/"
                                                 f"{chara_id}"
                             , json=weight_json) as response:
                             print(await response.text())
