@@ -75,11 +75,14 @@ async def regi_weight_task():
     async for mes in channel.history(before=(datetime.datetime.now() + datetime.timedelta(days=-3))):
         if len(mes.attachments) == 0:
             continue
+
         weight_json = json.loads(await mes.attachments[0].read())
         embed = mes.embeds[0]
         embed_title = embed.title
         embed_desc = embed.description
         reactions = mes.reactions
+
+        # print(f"{embed_title} {embed_desc}")
 
         if weight_json["lang"]["en"] != "":
             chara_id = f"{mes.attachments[0].filename.replace('.json', '')}_{weight_json['lang']['en']}"
@@ -93,15 +96,13 @@ async def regi_weight_task():
                         async with session.post(f"/weight/"
                                                 f"{chara_id}"
                             , json=weight_json) as response:
-                            print(response)
-                            pass
+                            print(await response.text())
                     if chara_id.startswith("8"):
                         async with aiohttp.ClientSession() as session:
                             async with session.post(f"{be_address}/weight/"
                                                     f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id) + 1))}"
                                 , json=weight_json) as response:
-                                print(response)
-                                pass
+                                print(await response.text())
                     embed.title = embed_title.replace("(投票中)", "(承認済)")
                     embed.colour = discord.Colour.brand_green()
                 else:
@@ -115,14 +116,12 @@ async def regi_weight_task():
                         async with session.put(f"{be_address}/weight/{chara_id}"
                             , json=weight_json) as response:
                             print(await response.text())
-                            pass
                     if chara_id.startswith("8"):
                         async with aiohttp.ClientSession() as session:
                             async with session.put(f"{be_address}/weight/"
                                                    f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id) + 1))}"
                                 , json=weight_json) as response:
                                 print(await response.text())
-                                pass
                     embed.title = embed_title.replace("(投票中)", "(承認済)")
                     embed.colour = discord.Colour.brand_green()
                 else:
