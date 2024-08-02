@@ -65,6 +65,8 @@ async def regi_weight_task():
                 name = "主人公・存護・炎"
             elif key == "8005":
                 name = "主人公・調和・虚数"
+            elif key == "1224":
+                name = "三月なのか・巡狩・虚数"
             elif int(key) > 8000:
                 continue
 
