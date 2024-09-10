@@ -29,6 +29,9 @@ async def init_bot():
     await utils.DataBase.init()
     status_update_task.start()
     regi_weight_task.start()
+
+
+async def git_task():
     os.chdir(f"{os.path.dirname(os.path.abspath(__file__))}/generate")
     os.system("git clone --filter=blob:none --no-checkout https://github.com/Mar-7th/StarRailRes.git")
     os.chdir('StarRailRes')
@@ -53,6 +56,7 @@ async def status_update_task():
 
 @tasks.loop(hours=24)
 async def regi_weight_task():
+    await git_task()
     with open(f"{os.path.dirname(os.path.abspath(__file__))}/generate/StarRailRes/index_min/jp/characters.json",
               encoding="utf-8") as f:
         chara_json = json.load(f)
