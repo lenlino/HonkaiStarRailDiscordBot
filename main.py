@@ -90,7 +90,7 @@ async def regi_weight_task():
 
         print(f"{embed_title} {embed_desc}")
 
-        if weight_json["lang"]["en"] != "":
+        if weight_json["lang"]["en"] != "" and weight_json["lang"]["en"] != "string":
             chara_id = f"{mes.attachments[0].filename.replace('.json', '')}_{weight_json['lang']['en']}"
         else:
             chara_id = f"{mes.attachments[0].filename.replace('.json', '')}"

@@ -97,8 +97,9 @@ class CardCommand(commands.Cog):
                 update_selector_option()
                 if len(selecter.options) != 0:
                     await ctx.edit(view=get_view())
-                await interaction.response.send_message("")
+                await interaction.response.edit_message()
             except discord.errors.HTTPException as ex:
+                print(ex.text)
                 pass
 
         async def calculation_selector_callback(interaction):
@@ -106,7 +107,7 @@ class CardCommand(commands.Cog):
                 nonlocal calculation_value
                 calculation_value = calculation_selecter.values[0]
                 await update_calc_selector()
-                await interaction.response.send_message("")
+                await interaction.response.edit_message()
             except discord.errors.HTTPException:
                 pass
 
@@ -116,7 +117,7 @@ class CardCommand(commands.Cog):
                 is_uid_hide = not is_uid_hide
                 update_uid_hide_button()
                 await ctx.edit(view=get_view())
-                await interaction.response.send_message("")
+                await interaction.response.edit_message()
             except discord.errors.HTTPException:
                 pass
 
@@ -126,7 +127,7 @@ class CardCommand(commands.Cog):
                 is_roll_hide = not is_roll_hide
                 update_roll_hide_button()
                 await ctx.edit(view=get_view())
-                await interaction.response.send_message("")
+                await interaction.response.edit_message()
             except discord.errors.HTTPException:
                 pass
 
@@ -171,7 +172,7 @@ class CardCommand(commands.Cog):
                 # 重み
                 weight_text = ""
                 avatar_id = json_parsed["characters"][select_number]['id']
-                weight_dict = await generate.utils.get_weight(avatar_id)
+                weight_dict = await generate.utils.get_weight(calculation_selecter.values[0])
 
                 for k, v in weight_dict.items():
                     if v == 0:
