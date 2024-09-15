@@ -45,11 +45,11 @@ class CreateWeightCommand(commands.Cog):
                 embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
             embed.add_field(name="脚", value=embed_value)
             embed_value = ""
-            for k, v in weight.main.w4.model_dump().items():
+            for k, v in weight.main.w5.model_dump().items():
                 embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
             embed.add_field(name="オーブ", value=embed_value)
             embed_value = ""
-            for k, v in weight.main.w5.model_dump().items():
+            for k, v in weight.main.w6.model_dump().items():
                 embed_value += f"{i18n.t('message.' + k, locale=lang)}: {v}\n"
             embed.add_field(name="縄", value=embed_value)
             embed_value = ""
