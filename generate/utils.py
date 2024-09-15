@@ -63,7 +63,7 @@ async def get_json_from_url(uid: str, lang: str):
                         "friend_count": detail_info_json["friendCount"],
                         "avatar": index.get_avatar_info(detail_info_json["headIcon"]),
                         "signature": detail_info_json.get("signature", ""),
-                        "is_display": detail_info_json["isDisplayAvatar"],
+                        "is_display": True,
                         "space_info": {
                             "memory_data": {
                                 "level": record_info_json.get("scheduleMaxLevel", 0),
