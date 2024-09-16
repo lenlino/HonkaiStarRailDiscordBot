@@ -2,11 +2,11 @@ from pydantic import BaseModel
 
 
 class Weight1(BaseModel):
-    HPDelta: float = 0.0
+    HPDelta: float = 1.0
 
 
 class Weight2(BaseModel):
-    AttackDelta: float = 0.0
+    AttackDelta: float = 1.0
 
 
 class Weight3(BaseModel):
