@@ -38,15 +38,21 @@ async def get_json_from_urlpath(path: str):
 
 async def get_chara_emoji(chara_id):
     import main
+    icon_data = None
+    for guild_id in main.emoji_guild_id.split(","):
+        guild = main.bot.get_guild(guild_id)
+        if guild is None:
+            return None
+        for emoji in guild.emojis:
+            if emoji.name == chara_id:
+                return emoji
+        if len(guild.emojis) < guild.emoji_limit:
+            icon_path = await get_image_from_url(main.resource_url + f"icon/avatar/{chara_id}.png")
+            icon_data = open(icon_path, "rb").read()
+            break
 
-    guild = main.bot.get_guild(main.emoji_guild_id)
-    if guild is None:
+    if icon_data is None:
         return None
-    for emoji in guild.emojis:
-        if emoji.name == chara_id:
-            return emoji
-    icon_path = await get_image_from_url(main.resource_url + f"icon/avatar/{chara_id}.png")
-    icon_data = open(icon_path, "rb").read()
     return await guild.create_custom_emoji(name=chara_id, image=icon_data)
 
 
