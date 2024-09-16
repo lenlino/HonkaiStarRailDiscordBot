@@ -21,6 +21,8 @@ import utils.DataBase
 bot = discord.AutoShardedBot()
 token = os.environ.get('HONKAI_TOKEN')
 be_address = os.environ.get('BE_ADDRESS', "https://hcs.lenlino.com")
+emoji_guild_id = os.environ.get('EMOJI_GUILD_ID', 1118740618882072596)
+resource_url = "https://raw.githubusercontent.com/Mar-7th/StarRailRes/master/"
 characters = []
 characters_name = {}
 

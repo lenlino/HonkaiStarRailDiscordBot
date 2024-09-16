@@ -11,7 +11,7 @@ import generate.utils
 import main
 import utils.DataBase
 from generate.generator import generate_panel
-from generate.utils import get_json_from_url, get_mihomo_lang
+from generate.utils import get_json_from_url, get_mihomo_lang, get_chara_emoji
 
 
 class CardCommand(commands.Cog):
@@ -232,7 +232,8 @@ class CardCommand(commands.Cog):
                 for index, i in enumerate(json_parsed["characters"]):
                     selecter.append_option(
                         discord.SelectOption(label=i["name"], value=str(index),
-                                             default=True if index == select_number else False))
+                                             default=True if index == select_number else False,
+                                             emoji=await get_chara_emoji(i["id"])))
 
                 if len(selecter.options) == 0:
                     embed.description += "\n" + i18n.t("message.error_no_chara_set", locale=lang)

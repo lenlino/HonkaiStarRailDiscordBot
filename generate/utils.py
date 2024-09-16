@@ -9,7 +9,6 @@ from PIL import Image
 from starrailres import Index
 from starrailres.models.info import CharacterBasicInfo, LevelInfo, LightConeBasicInfo, SubAffixBasicInfo, RelicBasicInfo
 
-
 conn = aiohttp.TCPConnector(limit_per_host=1)
 be_address = os.environ.get('BE_ADDRESS', "https://hcs.lenlino.com")
 
@@ -35,6 +34,20 @@ async def get_json_from_urlpath(path: str):
                 result_json = await response.json()
                 return result_json
             return None
+
+
+async def get_chara_emoji(chara_id):
+    import main
+
+    guild = main.bot.get_guild(main.emoji_guild_id)
+    if guild is None:
+        return None
+    for emoji in guild.emojis:
+        if emoji.name == chara_id:
+            return emoji
+    icon_path = await get_image_from_url(main.resource_url + f"icon/avatar/{chara_id}.png")
+    icon_data = open(icon_path, "rb").read()
+    return await guild.create_custom_emoji(name=chara_id, image=icon_data)
 
 
 async def get_json_from_url(uid: str, lang: str):
