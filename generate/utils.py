@@ -105,7 +105,7 @@ async def get_json_from_url(uid: str, lang: str):
                     if "equipment" in characters:
                         equipment = characters["equipment"]
                         basic_light_cone = LightConeBasicInfo(id=str(equipment["tid"]), rank=int(equipment["rank"]),
-                                                              level=int(equipment["level"]),
+                                                              level=int(equipment.get("level", 0)),
                                                               promotion=equipment.get("promotion", ""))
                     else:
                         basic_light_cone = None
