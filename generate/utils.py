@@ -40,7 +40,7 @@ async def get_chara_emoji(chara_id):
     import main
     icon_data = None
     for guild_id in main.emoji_guild_id.split(","):
-        guild = main.bot.get_guild(guild_id)
+        guild = main.bot.get_guild(int(guild_id))
         if guild is None:
             return None
         for emoji in guild.emojis:
