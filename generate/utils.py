@@ -125,7 +125,7 @@ async def get_json_from_url(uid: str, lang: str):
                                                   step=subaffix.get("step", 0)))
                         basic_relics.append(RelicBasicInfo(
                             id=str(relic["tid"]),
-                            level=relic["level"],
+                            level=relic.get("level", 0),
                             main_affix_id=str(relic["mainAffixId"]),
                             sub_affix_info=subaffix_list,
                         ))
