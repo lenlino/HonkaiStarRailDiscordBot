@@ -84,7 +84,7 @@ class CardCommand(commands.Cog):
             if is_defalut_set is False:
                 calculation_value = "no_score"
             chara_types.append(
-                discord.SelectOption(label=i18n.t("message.no_score", locale=lang), default=not is_defalut_set, value="no_score"))
+                discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score", default=is_defalut_set is False))
             calculation_selecter.options = chara_types
 
         async def selector_callback(interaction):
@@ -107,6 +107,8 @@ class CardCommand(commands.Cog):
                 nonlocal calculation_value
                 calculation_value = calculation_selecter.values[0]
                 await update_calc_selector()
+                if len(selecter.options) != 0:
+                    await ctx.edit(view=get_view())
                 await interaction.response.edit_message()
             except discord.errors.HTTPException:
                 pass
