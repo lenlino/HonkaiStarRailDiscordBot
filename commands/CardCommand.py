@@ -77,14 +77,28 @@ class CardCommand(commands.Cog):
                 else:
                     jp_name = i18n.t("message.compatibility_criteria", locale=lang)
                     en_name = "compatibility"
+
+                # デフォルト値を1つだけ設定するロジック
                 nonlocal calculation_value
-                is_default = en_name == calculation_value
-                is_defalut_set = is_default
+                if not is_defalut_set and en_name == calculation_value:  # 最初の一致だけ default=True に
+                    is_default = True
+                    is_defalut_set = True
+                else:
+                    is_default = False
+
                 chara_types.append(discord.SelectOption(label=jp_name, value=en_name, default=is_default))
-            if is_defalut_set is False:
+
+            # デフォルト値が設定されなかった場合のフォールバック
+            if not is_defalut_set:
                 calculation_value = "no_score"
-            chara_types.append(
-                discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score", default=is_defalut_set is False))
+                chara_types.append(
+                    discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score", default=True)
+                )
+            else:
+                chara_types.append(
+                    discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score", default=False)
+                )
+
             calculation_selecter.options = chara_types
 
         async def selector_callback(interaction):
