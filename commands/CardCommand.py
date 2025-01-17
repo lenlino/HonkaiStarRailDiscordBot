@@ -16,7 +16,7 @@ from generate.utils import get_json_from_url, get_mihomo_lang, get_chara_emoji
 
 class CardCommand(commands.Cog):
 
-    @discord.slash_command(name="card", description="Generate build card", guilds=["864441028866080768"],
+    @discord.slash_command(name="card", description="Generate build card",
                            integration_types={
                                discord.IntegrationType.guild_install,
                                discord.IntegrationType.user_install,
