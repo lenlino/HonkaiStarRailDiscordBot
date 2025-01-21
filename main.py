@@ -76,8 +76,8 @@ async def regi_weight_task():
             elif int(key) > 8000:
                 continue
 
-            characters.append(discord.OptionChoice(name=name, value=key))
-            characters_name[key] = name
+            characters.append(discord.OptionChoice(name=f"{name}({key})", value=key))
+            characters_name[key] = f"{name}({key})"
 
     channel = bot.get_channel(1242779790914752592)
     async for mes in channel.history(before=(datetime.datetime.now() + datetime.timedelta(days=-3))):
