@@ -12,7 +12,7 @@ numpy==1.24.3
 Pillow==9.5.0
 py-cord @ git+https://github.com/Pycord-Development/pycord
 yarl==1.9.2
-i18nice==0.9.1
+i18nice==0.15.5
 flask~=2.3.3
 python-dotenv~=1.0.0
 pandas~=2.1.2
