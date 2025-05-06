@@ -110,9 +110,11 @@ async def regi_weight_task():
                             , json=weight_json) as response:
                             print(await response.text())
                     if chara_id.startswith("8"):
+                        chara_id_int : int = int(chara_id.split("_")[0])
+                        new_id = (str(chara_id_int + 1) + chara_id.replace(str(chara_id_int), ''))
                         async with aiohttp.ClientSession() as session:
                             async with session.post(f"{be_address}/weight/"
-                                                    f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''), str(int(chara_id) + 1))}"
+                                                    f"{chara_id.replace(mes.attachments[0].filename.replace('.json', ''),new_id) }"
                                 , json=weight_json) as response:
                                 print(await response.text())
                     embed.title = embed_title.replace("(投票中)", "(承認済)")
