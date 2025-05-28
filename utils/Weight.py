@@ -1,4 +1,11 @@
 from pydantic import BaseModel
+from typing import List
+
+
+class RelicSetWeight(BaseModel):
+    id: str = ""
+    weight: float = 0.0
+    num: int = 2
 
 
 class Weight1(BaseModel):
@@ -81,3 +88,4 @@ class Weight(BaseModel):
     weight: WeightSub = WeightSub()
     max: float = 0.0
     lang: Lang = Lang()
+    relic_sets: List[RelicSetWeight] = []
