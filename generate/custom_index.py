@@ -31,7 +31,9 @@ T = TypeVar("T")
 
 def custom_decode_json(path: Path, t: Type[T]) -> T:
     """
-    Custom decode_json function that handles null values for max_sp in characters.json
+    Custom decode_json function that handles:
+    1. null values for max_sp in characters.json
+    2. missing guide_overview field in relic_sets.json
     """
     if not path.exists():
         raise FileNotFoundError(path)
@@ -52,12 +54,27 @@ def custom_decode_json(path: Path, t: Type[T]) -> T:
             # Convert back to JSON string
             content = json.dumps(data)
 
+        # If this is the relic_sets.json file and we're decoding to RelicSetIndex
+        elif path.name == "relic_sets.json" and t == RelicSetIndex:
+            # Parse the JSON manually first
+            data = json.loads(content)
+
+            # Add missing guide_overview field with an empty string as default value
+            for relic_set in data.values():
+                if "guide_overview" not in relic_set:
+                    relic_set["guide_overview"] = ""
+
+            # Convert back to JSON string
+            content = json.dumps(data)
+
         # Use msgspec to decode with the specified type
         return decode(content, type=t)
 
 class CustomIndex(OriginalIndex):
     """
-    Custom Index class that uses custom_decode_json to handle null values for max_sp
+    Custom Index class that uses custom_decode_json to handle:
+    1. null values for max_sp in characters.json
+    2. missing guide_overview field in relic_sets.json
     """
     def __init__(self, folder: Path) -> None:
         if not folder.exists():
@@ -88,7 +105,7 @@ class CustomIndex(OriginalIndex):
             folder / "light_cone_promotions.json", LightConePromotionIndex
         )
         self.relics = decode_json(folder / "relics.json", RelicIndex)
-        self.relic_sets = decode_json(folder / "relic_sets.json", RelicSetIndex)
+        self.relic_sets = custom_decode_json(folder / "relic_sets.json", RelicSetIndex)
         self.relic_main_affixes = decode_json(
             folder / "relic_main_affixes.json", RelicMainAffixIndex
         )
