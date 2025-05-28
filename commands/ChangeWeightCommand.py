@@ -145,6 +145,8 @@ class ChangeWeightCommand(commands.Cog):
             await ctx.interaction.edit(embed=embed)
 
         class MyView(discord.ui.View):
+            def __init__(self, *args, **kwargs):
+                super().__init__(timeout=3600, *args, **kwargs)
             @discord.ui.button(label="胴1")
             async def button_callback_31(self, button, interaction):
                 await interaction.response.send_modal(Modal31(title="胴1"))
@@ -476,7 +478,7 @@ class ChangeWeightCommand(commands.Cog):
 
         class RelicSetView(discord.ui.View):
             def __init__(self, title, *args, **kwargs) -> None:
-                super().__init__(*args, **kwargs)
+                super().__init__(timeout=3600, *args, **kwargs)
                 self.title = title
                 self.relic_sets_data = {}
                 self.selected_set_id = None

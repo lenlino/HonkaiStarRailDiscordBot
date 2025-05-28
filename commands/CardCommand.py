@@ -40,7 +40,7 @@ class CardCommand(commands.Cog):
 
         def get_view():
             return View(selecter, calculation_selecter, generate_button, uid_change_button, uid_hide_button,
-                        roll_hide_button, timeout=3000)
+                        roll_hide_button, timeout=3600)
 
         def update_uid_hide_button():
             if is_uid_hide:
