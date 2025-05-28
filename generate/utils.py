@@ -6,8 +6,10 @@ import pandas as pd
 
 import aiohttp
 from PIL import Image
-from starrailres import Index
 from starrailres.models.info import CharacterBasicInfo, LevelInfo, LightConeBasicInfo, SubAffixBasicInfo, RelicBasicInfo
+
+# Import our custom Index class
+from generate.custom_index import CustomIndex
 
 conn = aiohttp.TCPConnector(limit_per_host=1)
 be_address = os.environ.get('BE_ADDRESS', "https://hcs.lenlino.com")
@@ -64,7 +66,7 @@ async def get_json_from_url(uid: str, lang: str):
                 result_json = await response.json()
     if len(result_json.keys()) == 0 or "detail" in result_json:
         filepath = pathlib.Path(f"{os.path.dirname(os.path.abspath(__file__))}/StarRailRes/index_min/{lang}")
-        index = Index(filepath)
+        index = CustomIndex(filepath)
         async with aiohttp.ClientSession(connector_owner=False, connector=conn) as session:
             async with session.get(f"https://enka.network/api/hsr/uid/{uid}") as response:
                 if response.status != 200:
