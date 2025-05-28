@@ -305,6 +305,29 @@ async def get_weight(chara_id):
         return await get_weight(chara_id)
 
 
+async def get_full_weight(chara_id):
+    """Get the full weight dictionary for a character, including relic_sets"""
+    if str(chara_id) in weight_dict:
+        return weight_dict[str(chara_id)]
+    else:
+        weight_dict[str(chara_id)] = await get_json_from_urlpath(f"/weight/{chara_id}")
+        return weight_dict[str(chara_id)]
+
+
+async def get_relic_set_name(relic_set_id, lang="jp"):
+    """Get the name of a relic set from its ID"""
+    relic_sets_path = f"{os.path.dirname(os.path.abspath(__file__))}/StarRailRes/index_min/{lang}/relic_sets.json"
+    try:
+        with open(relic_sets_path, 'r', encoding='utf-8') as f:
+            relic_sets = json.load(f)
+        if relic_set_id in relic_sets:
+            return relic_sets[relic_set_id]["name"]
+        return relic_set_id  # Return the ID if not found
+    except Exception as e:
+        print(f"Error loading relic sets: {e}")
+        return relic_set_id  # Return the ID if there's an error
+
+
 async def get_weight_list(chara_id):
     """with open(f"{os.path.dirname(os.path.abspath(__file__))}/weight.json") as f:
         weight_json = json.load(f)"""

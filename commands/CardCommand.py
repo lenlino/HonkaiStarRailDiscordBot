@@ -11,7 +11,7 @@ import generate.utils
 import main
 import utils.DataBase
 from generate.generator import generate_panel
-from generate.utils import get_json_from_url, get_mihomo_lang, get_chara_emoji
+from generate.utils import get_json_from_url, get_mihomo_lang, get_chara_emoji, get_full_weight, get_relic_set_name
 
 
 class CardCommand(commands.Cog):
@@ -189,15 +189,67 @@ class CardCommand(commands.Cog):
                 weight_text = ""
                 avatar_id = json_parsed["characters"][select_number]['id']
                 if calculation_value != "compatibility" and calculation_value != "no_score":
-                    weight_dict = await generate.utils.get_weight(avatar_id + "_" + calculation_value)
+                    full_weight_dict = await get_full_weight(avatar_id + "_" + calculation_value)
                 else:
-                    weight_dict = await generate.utils.get_weight(avatar_id)
+                    full_weight_dict = await get_full_weight(avatar_id)
 
+                weight_dict = full_weight_dict["weight"]
                 for k, v in weight_dict.items():
                     if v == 0:
                         continue
                     weight_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
                 res_embed.add_field(name=i18n.t(f'message.weight', locale=lang), value=weight_text)
+
+                # 装備の重みとセット装備の点数
+                if "relic_sets" in full_weight_dict and full_weight_dict["relic_sets"]:
+                    relic_sets_text = ""
+                    for relic_set in full_weight_dict["relic_sets"]:
+                        set_name = await get_relic_set_name(relic_set['id'], lang)
+                        relic_sets_text += f"{set_name} ({relic_set['num']}): {relic_set['weight']}\n"
+                    res_embed.add_field(name=i18n.t(f'message.relic_sets', locale=lang), value=relic_sets_text)
+
+                # 装備ごとの重み (w3: 胴, w4: 足, w5: オーブ, w6: 縄)
+                if "main" in full_weight_dict:
+                    main_weights = full_weight_dict["main"]
+                    equipment_weights_text = ""
+
+                    # Body (胴)
+                    if "w3" in main_weights:
+                        equipment_weights_text += f"**{i18n.t('message.body', locale=lang)}**:\n"
+                        for k, v in main_weights["w3"].items():
+                            if v == 0:
+                                continue
+                            equipment_weights_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
+                        equipment_weights_text += "\n"
+
+                    # Feet (足)
+                    if "w4" in main_weights:
+                        equipment_weights_text += f"**{i18n.t('message.feet', locale=lang)}**:\n"
+                        for k, v in main_weights["w4"].items():
+                            if v == 0:
+                                continue
+                            equipment_weights_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
+                        equipment_weights_text += "\n"
+
+                    # Orb (オーブ)
+                    if "w5" in main_weights:
+                        equipment_weights_text += f"**{i18n.t('message.orb', locale=lang)}**:\n"
+                        for k, v in main_weights["w5"].items():
+                            if v == 0:
+                                continue
+                            equipment_weights_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
+                        equipment_weights_text += "\n"
+
+                    # Rope (縄)
+                    if "w6" in main_weights:
+                        equipment_weights_text += f"**{i18n.t('message.rope', locale=lang)}**:\n"
+                        for k, v in main_weights["w6"].items():
+                            if v == 0:
+                                continue
+                            equipment_weights_text += f"{i18n.t(f'message.{k}', locale=lang)}: {v}\n"
+
+                    if equipment_weights_text:
+                        res_embed.add_field(name=i18n.t(f'message.equipment_weights', locale=lang), value=equipment_weights_text)
 
                 score_rank = panel_img_result["header"]
                 # score_rank = generate.utils.get_score_rank(int(avatar_id), uid, panel_img_result['score'])
