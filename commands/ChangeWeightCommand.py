@@ -140,7 +140,7 @@ class ChangeWeightCommand(commands.Cog):
                     # Show both weight and num changes
                     embed_value += f"{relic_name}: {base_value}->{relic_set.weight} ({relic_set.num}セット)\n"
             if embed_value != "":
-                embed.add_field(name="聖遺物セット", value=embed_value)
+                embed.add_field(name="遺物セット", value=embed_value)
 
             await ctx.interaction.edit(embed=embed)
 
@@ -183,12 +183,12 @@ class ChangeWeightCommand(commands.Cog):
             async def button_callback_s3(self, button, interaction):
                 await interaction.response.send_modal(Modals3(title="サブステ3"))
 
-            @discord.ui.button(label="聖遺物セット")
+            @discord.ui.button(label="遺物セット")
             async def button_callback_relic_sets(self, button, interaction):
                 # Create and show the RelicSetView instead of the modal
-                relic_set_view = RelicSetView(title="聖遺物セット")
+                relic_set_view = RelicSetView(title="遺物セット")
                 await relic_set_view.initialize()
-                await interaction.response.send_message("聖遺物セットを選択してください", view=relic_set_view, ephemeral=True)
+                await interaction.response.send_message("遺物セットを選択してください", view=relic_set_view, ephemeral=True)
 
             @discord.ui.button(label="送信", style=discord.ButtonStyle.primary)
             async def button_callback_send(self, button, interaction):
@@ -489,7 +489,7 @@ class ChangeWeightCommand(commands.Cog):
                 self.all_set_ids = []
 
                 # Create selector for relic sets
-                self.relic_set_selector = Select(placeholder="聖遺物セットを選択してください")
+                self.relic_set_selector = Select(placeholder="遺物セットを選択してください")
                 self.relic_set_selector.callback = self.relic_set_selected
                 self.add_item(self.relic_set_selector)
 
@@ -647,11 +647,16 @@ class ChangeWeightCommand(commands.Cog):
 
             async def add_relic_set(self, interaction):
                 if not self.selected_set_id or not self.weight_input.value:
-                    await interaction.response.send_message("聖遺物セットと重みを選択してください", ephemeral=True)
+                    await interaction.response.send_message("遺物セットと重みを選択してください", ephemeral=True)
                     return
 
                 try:
                     weight_value = float(self.weight_input.value)
+
+                    if  weight_value > 30 or weight_value < 0:
+                        await interaction.response.send_message("30以下の数字を入れてください。", ephemeral=True)
+                        return
+
                     num_value = int(self.num_selector.values[0]) if self.num_selector.values else 2
 
                     # Add or update the relic set
@@ -682,7 +687,7 @@ class ChangeWeightCommand(commands.Cog):
                     await interaction.response.send_message("重みは数値で入力してください", ephemeral=True)
 
             async def finish(self, interaction):
-                await interaction.response.edit_message(content="聖遺物セットの設定を完了しました", view=None)
+                await interaction.response.edit_message(content="遺物セットの設定を完了しました", view=None)
 
         # Keep the old modal for backward compatibility
         class ModalRelicSets(discord.ui.Modal):
@@ -700,7 +705,7 @@ class ChangeWeightCommand(commands.Cog):
 
                 # Add instructions
                 self.add_item(
-                    discord.ui.InputText(label="聖遺物セットの重みを設定（最大30点）",
+                    discord.ui.InputText(label="遺物セットの重みを設定（最大30点）",
                                          style=discord.InputTextStyle.paragraph,
                                          value="形式: セットID:重み:セット数（例: 101:10:2,102:5:4）\nセット数は2または4",
                                          required=False))
