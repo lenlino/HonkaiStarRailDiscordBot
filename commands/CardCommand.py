@@ -90,14 +90,16 @@ class CardCommand(commands.Cog):
 
             # デフォルト値が設定されなかった場合のフォールバック
             if not is_defalut_set:
-                calculation_value = "no_score"
+
                 if len(chara_types) != 0:
+                    calculation_value = chara_types[0].value
                     chara_types[0].default = True
                     chara_types.append(
                         discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score",
                                              default=False)
                     )
                 else:
+                    calculation_value = "no_score"
                     chara_types.append(
                         discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score",
                                              default=True)
