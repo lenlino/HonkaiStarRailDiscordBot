@@ -157,7 +157,7 @@ class CardCommand(commands.Cog):
             except discord.errors.HTTPException:
                 pass
 
-        async def button_callback(interaction):
+        async def button_callback(interaction: discord.Interaction):
             await interaction.response.defer()
             if selecter.options[0].label == i18n.t("message.uid_not_set", locale=lang):
                 await interaction.followup.send(i18n.t("message.error_uid_not_set", locale=lang))
@@ -166,7 +166,7 @@ class CardCommand(commands.Cog):
                 generate_button.label = i18n.t("message.generating", locale=lang)
                 generate_button.disabled = True
                 print(uid)
-                await utils.DataBase.setdatabase(ctx.user.id, "uid", uid)
+                await utils.DataBase.setdatabase(interaction.user.id, "uid", uid)
                 await ctx.edit(view=get_view())
                 nonlocal select_number
                 panel_img_result = await generate_panel(uid=uid, chara_id=int(select_number), template=2,
@@ -299,7 +299,7 @@ class CardCommand(commands.Cog):
             nonlocal uid
             nonlocal user_detail_dict
             nonlocal json_parsed
-            json_parsed = await get_json_from_url(changed_uid, lang)
+            json_parsed = await get_json_from_url(str(changed_uid), lang)
 
             if "detail" not in json_parsed:
                 embed.description = f"{i18n.t('message.nickname', locale=lang)} {json_parsed['player']['nickname']}\nUID: {json_parsed['player']['uid']}"
