@@ -69,14 +69,19 @@ class CardCommand(commands.Cog):
                                        f"{chara_id}") as response:
                     chara_type_json = await response.json()
 
+            # data_countで降順ソート
+            sorted_chara_types = sorted(chara_type_json.items(), key=lambda item: item[1].get("data_count", 0), reverse=True)
+
             is_defalut_set = False
-            for k, v in chara_type_json.items():
+            for k, v in sorted_chara_types:
                 if "lang" in v and v["lang"]["jp"] != "string" and v["lang"]["jp"] != "":
                     jp_name = v["lang"]["jp"]
                     en_name = v["lang"]["en"]
                 else:
                     jp_name = i18n.t("message.compatibility_criteria", locale=lang)
                     en_name = "compatibility"
+
+                data_count: int = v.get("data_count", 0)
 
                 # デフォルト値を1つだけ設定するロジック
                 nonlocal calculation_value
@@ -86,7 +91,7 @@ class CardCommand(commands.Cog):
                 else:
                     is_default = False
 
-                chara_types.append(discord.SelectOption(label=jp_name, value=en_name, default=is_default))
+                chara_types.append(discord.SelectOption(label=f"{jp_name} (データ数: {data_count})", value=en_name, default=is_default))
 
             # デフォルト値が設定されなかった場合のフォールバック
             if not is_defalut_set:
