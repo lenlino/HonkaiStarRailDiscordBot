@@ -14,7 +14,8 @@ pool = None
 async def init():
     global pool
     conn = await asyncpg.connect(user=DB_USER, password=DB_PASS, database=DB_NAME, host=DB_HOST, port=DB_PORT)
-    await conn.execute('CREATE TABLE IF NOT EXISTS honkai_user(id char(20) UNIQUE, uid integer);')
+    await conn.execute('CREATE TABLE IF NOT EXISTS honkai_user(id char(20) UNIQUE, uid integer, calculation_method varchar(50), last_character_id varchar(20));')
+
     await conn.close()
     pool = await get_connection()
 
@@ -50,5 +51,9 @@ async def setdatabase(userid, id, value, table="honkai_user"):
         if rows is None:
             await conn.execute('INSERT INTO honkai_user (id) VALUES ($1);', (str(userid)))
             rows = await conn.fetchrow('SELECT uid from honkai_user where id = $1;', (str(userid)))
-        await conn.execute(f'UPDATE {table} SET {id} = $1 WHERE "id" = $2;', int(value), str(userid))
+        # uidカラムのみ整数に変換、その他は文字列として保存
+        if id == "uid":
+            await conn.execute(f'UPDATE {table} SET {id} = $1 WHERE "id" = $2;', int(value), str(userid))
+        else:
+            await conn.execute(f'UPDATE {table} SET {id} = $1 WHERE "id" = $2;', str(value), str(userid))
         return rows[0]
