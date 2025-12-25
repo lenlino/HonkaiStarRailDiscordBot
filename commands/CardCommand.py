@@ -30,7 +30,9 @@ class CardCommand(commands.Cog):
         uid_hide_button = Button()
         roll_hide_button = Button()
         select_number = 0
-        calculation_value = "compatibility"
+        # データベースから前回の計算方法を取得
+        saved_calculation = await utils.DataBase.getdatabase(ctx.user.id, "calculation_method")
+        calculation_value = saved_calculation if saved_calculation else "compatibility"
         is_uid_hide = False
         is_roll_hide = False
         lang = get_mihomo_lang(ctx.interaction.locale)
@@ -120,8 +122,7 @@ class CardCommand(commands.Cog):
             try:
                 nonlocal select_number
                 select_number = int(selecter.values[0])
-                nonlocal calculation_value
-                calculation_value = "compatibility"
+                # キャラクター変更時も前回の計算方法を保持（存在しない場合はupdate_calc_selectorでフォールバック）
                 await update_calc_selector()
                 update_selector_option()
                 if len(selecter.options) != 0:
@@ -278,6 +279,11 @@ class CardCommand(commands.Cog):
 
                 res_embed.set_image(url=f"attachment://{file.filename}")
                 await interaction.followup.send(embed=res_embed, file=file)
+
+                # 生成成功時に選択したキャラクターIDと計算方法を保存
+                await utils.DataBase.setdatabase(interaction.user.id, "last_character_id", str(avatar_id))
+                await utils.DataBase.setdatabase(interaction.user.id, "calculation_method", calculation_value)
+
                 generate_button.label = i18n.t('message.generate', locale=lang)
                 generate_button.disabled = False
                 await set_uid(uid)
@@ -304,6 +310,7 @@ class CardCommand(commands.Cog):
             nonlocal uid
             nonlocal user_detail_dict
             nonlocal json_parsed
+            nonlocal select_number
             json_parsed = await get_json_from_url(str(changed_uid), lang)
 
             if "detail" not in json_parsed:
@@ -311,6 +318,17 @@ class CardCommand(commands.Cog):
 
                 user_detail_dict = json_parsed
                 uid = json_parsed['player']['uid']
+
+                # 前回選択したキャラクターIDを取得して、存在する場合はそれをデフォルトにする
+                saved_character_id = await utils.DataBase.getdatabase(ctx.user.id, "last_character_id")
+                if saved_character_id:
+                    # キャラクターリストから該当するIDを探す
+                    for index, character in enumerate(json_parsed["characters"]):
+                        if str(character["id"]) == saved_character_id:
+                            select_number = index
+                            break
+                    # 見つからなかった場合はselect_number = 0のまま（デフォルト）
+
                 selecter.options = []
                 for index, i in enumerate(json_parsed["characters"]):
                     selecter.append_option(
