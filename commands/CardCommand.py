@@ -93,28 +93,27 @@ class CardCommand(commands.Cog):
                 else:
                     is_default = False
 
-                chara_types.append(discord.SelectOption(label=f"{jp_name} (データ数: {data_count})", value=en_name, default=is_default))
+                chara_types.append(discord.SelectOption(label=f"{jp_name}(データ数: {data_count})", value=en_name, default=is_default))
 
-            # デフォルト値が設定されなかった場合のフォールバック
-            if not is_defalut_set:
-
-                if len(chara_types) != 0:
-                    calculation_value = chara_types[0].value
-                    chara_types[0].default = True
-                    chara_types.append(
-                        discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score",
-                                             default=False)
-                    )
-                else:
-                    calculation_value = "no_score"
-                    chara_types.append(
-                        discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score",
-                                             default=True)
-                    )
+            # no_scoreを追加（calculation_valueが"no_score"の場合はデフォルトに設定）
+            if calculation_value == "no_score":
+                chara_types.append(
+                    discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score", default=True)
+                )
+                is_defalut_set = True
             else:
                 chara_types.append(
                     discord.SelectOption(label=i18n.t("message.no_score", locale=lang), value="no_score", default=False)
                 )
+
+            # デフォルト値が設定されなかった場合のフォールバック
+            if not is_defalut_set:
+                if len(chara_types) > 1:  # no_score以外の選択肢がある場合
+                    calculation_value = chara_types[0].value
+                    chara_types[0].default = True
+                else:  # no_scoreしかない場合
+                    calculation_value = "no_score"
+                    chara_types[0].default = True
 
             calculation_selecter.options = chara_types
 
@@ -188,7 +187,8 @@ class CardCommand(commands.Cog):
                     await interaction.followup.send(embed=res_embed)
                     generate_button.label = i18n.t('message.generate', locale=lang)
                     generate_button.disabled = False
-                    await set_uid(uid)
+                    # エラー時はセレクタをリセットせず、ビューのみ更新
+                    await ctx.edit(view=get_view())
                     return
                 image_binary.write(panel_img_result['img'])
                 # panel_img = panel_img_result['img']
