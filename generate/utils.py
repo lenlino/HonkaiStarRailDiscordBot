@@ -44,9 +44,9 @@ async def get_chara_emoji(chara_id):
     for emoji in main.bot.emojis:
         if emoji.name == chara_id:
             return emoji
-    if len(main.bot.emojis) < 2000:
-        icon_path = await get_image_from_url(main.resource_url + f"icon/avatar/{chara_id}.png")
-        icon_data = open(icon_path, "rb").read()
+
+    icon_path = await get_image_from_url(main.resource_url + f"icon/avatar/{chara_id}.png")
+    icon_data = open(icon_path, "rb").read()
 
     if icon_data is None:
         return None
