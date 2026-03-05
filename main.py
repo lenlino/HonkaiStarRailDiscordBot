@@ -19,7 +19,7 @@ load_dotenv()
 
 import utils.DataBase
 
-bot = discord.AutoShardedBot()
+bot = discord.AutoShardedBot(cache_app_emojis=True)
 token = os.environ.get('HONKAI_TOKEN')
 be_address = os.environ.get('BE_ADDRESS', "https://hcs.lenlino.com")
 emoji_guild_id = os.environ.get('EMOJI_GUILD_ID', "1118740618882072596,864441028866080768")
