@@ -41,7 +41,7 @@ async def get_json_from_urlpath(path: str):
 async def get_chara_emoji(chara_id):
     import main
     icon_data = None
-    for emoji in main.bot.emojis:
+    for emoji in main.bot.app_emojis:
         if emoji.name == chara_id:
             return emoji
 
