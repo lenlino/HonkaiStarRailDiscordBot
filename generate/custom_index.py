@@ -70,7 +70,9 @@ def custom_decode_json(path: Path, t: Type[T]) -> T:
             # Add missing guide_overview field with an empty string as default value
             for relic_set in data.values():
                 if "guide_overview" not in relic_set:
-                    relic_set["guide_overview"] = ""
+                    relic_set["guide_overview"] = []
+                elif isinstance(relic_set["guide_overview"], str):
+                    relic_set["guide_overview"] = [relic_set["guide_overview"]] if relic_set["guide_overview"] else []
 
             # Convert back to JSON string
             content = json.dumps(data)
