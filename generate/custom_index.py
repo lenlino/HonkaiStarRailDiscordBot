@@ -54,6 +54,14 @@ def custom_decode_json(path: Path, t: Type[T]) -> T:
             # Convert back to JSON string
             content = json.dumps(data)
 
+        # If this is the character_skills.json file
+        elif path.name == "character_skills.json" and t == CharacterSkillIndex:
+            data = json.loads(content)
+            for skill in data.values():
+                if skill.get("icon") is None:
+                    skill["icon"] = ""
+            content = json.dumps(data)
+
         # If this is the relic_sets.json file and we're decoding to RelicSetIndex
         elif path.name == "relic_sets.json" and t == RelicSetIndex:
             # Parse the JSON manually first
@@ -88,7 +96,7 @@ class CustomIndex(OriginalIndex):
         self.character_ranks = decode_json(
             folder / "character_ranks.json", CharacterRankIndex
         )
-        self.character_skills = decode_json(
+        self.character_skills = custom_decode_json(
             folder / "character_skills.json", CharacterSkillIndex
         )
         self.character_skill_trees = decode_json(
