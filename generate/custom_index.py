@@ -53,9 +53,10 @@ def custom_decode_json(path: Path, t: Type[T]) -> T:
             if "max_sp" in entry and entry["max_sp"] == "":
                 entry["max_sp"] = 0.0
             # guide_overviewはList[str]型
-            if "guide_overview" in entry:
-                if isinstance(entry["guide_overview"], str):
-                    entry["guide_overview"] = [entry["guide_overview"]] if entry["guide_overview"] else []
+            if "guide_overview" not in entry:
+                entry["guide_overview"] = []
+            elif isinstance(entry["guide_overview"], str):
+                entry["guide_overview"] = [entry["guide_overview"]] if entry["guide_overview"] else []
 
     return decode(json.dumps(data), type=t)
 
