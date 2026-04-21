@@ -62,6 +62,7 @@ async def get_json_from_url(uid: str, lang: str):
         async with session.get(f"{be_address}/sr_info_parsed/{uid}?lang={lang}") as response:
             if response.status == 200:
                 result_json = await response.json()
+    return result_json
     if len(result_json.keys()) == 0 or "detail" in result_json:
         filepath = pathlib.Path(f"{os.path.dirname(os.path.abspath(__file__))}/StarRailRes/index_min/{lang}")
         index = CustomIndex(filepath)
