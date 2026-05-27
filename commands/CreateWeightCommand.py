@@ -35,6 +35,11 @@ class CreateWeightCommand(commands.Cog):
                                     jp_name: discord.Option(required=True, description="基準の日本語名（攻撃型、回復型など）"),
                                     en_name: discord.Option(required=True, description="基準の英語名・スペース、記号禁止（attack、healなど）")):
         await ctx.defer()
+        resolved_chara = main.resolve_chara_id(chara_id)
+        if resolved_chara is None:
+            await ctx.send_followup("存在しないキャラクターです")
+            return
+        chara_id = resolved_chara
         weight = utils.Weight.Weight()
         lang = get_mihomo_lang(ctx.interaction.locale)
         embed = discord.Embed(

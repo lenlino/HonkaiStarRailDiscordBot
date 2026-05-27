@@ -54,6 +54,29 @@ class ChangeWeightCommand(commands.Cog):
                                     type_id: discord.Option(required=True, description="基準名", input_type=str,
                                                             autocomplete=discord.utils.basic_autocomplete(get_chara_types))):
         await ctx.defer()
+        resolved_chara = main.resolve_chara_id(chara_id)
+        if resolved_chara is None:
+            await ctx.send_followup("存在しないキャラクターです")
+            return
+        chara_id = resolved_chara
+
+        # type_id を日本語名/英語名から解決
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{main.be_address}/weight_list/{chara_id}") as response:
+                type_list_json = await response.json()
+        valid_types = {}
+        for k, v in type_list_json.items():
+            if "lang" in v and v["lang"]["jp"] != "string" and v["lang"]["jp"] != "":
+                valid_types[v["lang"]["en"]] = v["lang"]["en"]
+                valid_types[v["lang"]["jp"]] = v["lang"]["en"]
+            else:
+                valid_types["def"] = "def"
+                valid_types["相性基準"] = "def"
+        if type_id not in valid_types:
+            await ctx.send_followup("存在しない基準名です")
+            return
+        type_id = valid_types[type_id]
+
         weight = utils.Weight.Weight()
         base_weight = utils.Weight.Weight()
         if type_id == "def":

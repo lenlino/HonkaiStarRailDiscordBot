@@ -28,6 +28,17 @@ characters = []
 characters_name = {}
 
 
+def resolve_chara_id(value):
+    """キャラ名（表示名 or 名前部分）をIDに変換。一致しなければNone。"""
+    if value in characters_name:
+        return value
+    for key, display in characters_name.items():
+        name = display.rsplit("(", 1)[0]
+        if value == display or value == name:
+            return key
+    return None
+
+
 async def init_bot():
     await utils.DataBase.init()
     status_update_task.start()
