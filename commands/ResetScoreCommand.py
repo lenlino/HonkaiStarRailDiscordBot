@@ -65,6 +65,8 @@ class ResetScoreCommand(commands.Cog):
         attachment = discord.File(fp=io.BytesIO(bytes(json.dumps(reset_json), encoding="utf-8")),
                                   filename=f"{chara_id}.json")
         message = await ctx.send_followup(embed=embed, file=attachment)
+        # followup の WebhookMessage はギルド情報を持たず create_thread が失敗するため取得し直す
+        message = await ctx.channel.fetch_message(message.id)
         await message.add_reaction("⭕")
         await message.add_reaction("❌")
         await message.create_thread(name="申請理由など")
