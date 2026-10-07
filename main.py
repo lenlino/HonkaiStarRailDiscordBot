@@ -108,6 +108,24 @@ async def regi_weight_task():
 
         print(f"{embed_title} {embed_desc}")
 
+        if embed_desc == "スコアリセット申請":
+            if embed_title.endswith("(投票中)"):
+                if reactions[0].count >= reactions[1].count:
+                    reset_id = mes.attachments[0].filename.replace('.json', '')
+                    reset_ids = [reset_id, str(int(reset_id) + 1)] if reset_id.startswith("8") else [reset_id]
+                    async with aiohttp.ClientSession() as session:
+                        for target_id in reset_ids:
+                            async with session.delete(f"{be_address}/scores/{target_id}",
+                                                      params=weight_json) as response:
+                                print(await response.text())
+                    embed.title = embed_title.replace("(投票中)", "(承認済)")
+                    embed.colour = discord.Colour.brand_green()
+                else:
+                    embed.title = embed_title.replace("(投票中)", "(非承認)")
+                    embed.colour = discord.Colour.brand_red()
+                await mes.edit(embed=embed)
+            continue
+
         if weight_json["lang"]["en"] != "" and weight_json["lang"]["en"] != "string":
             chara_id = f"{mes.attachments[0].filename.replace('.json', '')}_{weight_json['lang']['en']}"
         else:
@@ -160,4 +178,5 @@ async def regi_weight_task():
 bot.load_extension('commands.CardCommand')
 bot.load_extension('commands.CreateWeightCommand')
 bot.load_extension('commands.ChangeWeightCommand')
+bot.load_extension('commands.ResetScoreCommand')
 bot.run(token)
